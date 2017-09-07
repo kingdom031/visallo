@@ -391,7 +391,8 @@ define([
             return this.props.registry['org.visallo.graph.options'].map(e => ({
                 identifier: e.identifier,
                 componentPath: e.optionComponentPath,
-                product: this.props.product
+                product: this.props.product,
+                button: e.button
             }));
         },
 

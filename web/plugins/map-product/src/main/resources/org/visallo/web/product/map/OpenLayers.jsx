@@ -4,14 +4,14 @@ define([
     'openlayers',
     'fast-json-patch',
     './multiPointCluster',
-    'components/NavigationControls'
+    'components/navigationControls/NavControls'
 ], function(
     createReactClass,
     PropTypes,
     ol,
     jsonpatch,
     MultiPointCluster,
-    NavigationControls) {
+    NavControls) {
 
     const noop = function() {};
 
@@ -210,7 +210,7 @@ define([
             return (
                 <div style={{height: '100%'}}>
                     <div style={{height: '100%'}} ref="map"></div>
-                    <NavigationControls
+                    <NavControls
                         tools={this.injectExtraPropsToTools()}
                         rightOffset={this.props.panelPadding.right}
                         onFit={this.onControlsFit}

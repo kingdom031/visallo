@@ -1,7 +1,7 @@
 
 input { .box-shadow(none); }
 
-@padding: 20px;
+@padding: 10px;
 
 .controls {
   position: absolute;
@@ -37,6 +37,51 @@ input { .box-shadow(none); }
         background-position: center;
         width: 1.2em;
     }
+
+    .tools-list {
+      list-style-type: none;
+      display: flex;
+
+      li {
+        margin-right: 0.25em;
+      }
+
+      .tool-button .button {
+        display: flex;
+        height: 23px;
+        max-width: 10em;
+        padding: 0 0.25em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        background-color: @bg;
+        border-radius: 2px;
+        color: white;
+        cursor: pointer;
+
+        &.active {
+          background-color: @active-bg;
+          border-bottom-left-radius: 0;
+          border-bottom-right-radius: 0;
+        }
+        &:hover {
+          background-color: @active-bg;
+        }
+
+        .tool-icon {
+          width: 20px;
+          height: 23px;
+          background-size: 60%;
+          background-repeat: no-repeat;
+          background-position: center;
+        }
+
+        span {
+          padding-top: 0.1em;
+        }
+      }
+    }
+
   }
   button {
       background-color: @bg;

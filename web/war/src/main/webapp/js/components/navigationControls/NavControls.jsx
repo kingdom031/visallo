@@ -1,8 +1,13 @@
 define([
     'create-react-class',
     'prop-types',
-    './Attacher'
-], function(createReactClass, PropTypes, Attacher) {
+    '../Attacher',
+    './NavControlsToolsList'
+], function(
+    createReactClass,
+    PropTypes,
+    Attacher,
+    NavControlsToolsList) {
     'use strict';
 
     const PAN_INACTIVE_AREA = 8;
@@ -15,7 +20,7 @@ define([
     const STATE_END = { state: 'panningEnd' };
     const EMPTY = { x: 0, y: 0 };
 
-    const NavigationControls = createReactClass({
+    const NavControls = createReactClass({
 
         propTypes: {
             zoom: PropTypes.bool,
@@ -46,55 +51,28 @@ define([
 
         getInitialState() {
             return {
-                panning: false,
-                optionsOpen: false
+                panning: false
             }
         },
 
         componentDidMount() {
-            window.addEventListener('click', this.handleClick, false);
+            //TODO: esc keyup close
         },
 
         componentWillUnmount() {
-            window.removeEventListener('click', this.handleClick);
-        },
-
-        handleClick(event) {
-            if (this.state.optionsOpen && !this.refs.options.contains(event.target)) {
-                this.setState({ optionsOpen: false });
-            }
+            //TODO: off esc keyup close
         },
 
         render() {
-            const { optionsOpen } = this.state;
             const { tools, rightOffset } = this.props;
-            const options = !_.isEmpty(tools) ?
-                (
-                    <div ref="options" className="options">
-                        <button className={optionsOpen ? 'active' : ' '}
-                            onClick={() => this.setState({ optionsOpen: !optionsOpen})}
-                            title={i18n('controls.options.toggle')}>Options</button>
-                        <div style={{display: (optionsOpen ? 'block' : 'none')}} className="options-container">
-                            <ul>{
-                                tools.map(tool => {
-                                    return <Attacher
-                                        nodeType="li"
-                                        key={tool.identifier}
-                                        componentPath={tool.componentPath}
-                                        {...(tool.props || {})} />
-                                })
-                            }</ul>
-                        </div>
-                    </div>
-                ) : null,
-                panningCls = 'panner' + (this.state.panning ? ' active' : ''),
-                panningStyle = this.state.panning && this.state.pan ? {
+            const panningCls = 'panner' + (this.state.panning ? ' active' : '');
+            const panningStyle = this.state.panning && this.state.pan ? {
                     background: `radial-gradient(circle at ${calculatePosition(this.state.pan)}, #575757, #929292 60%)`
-                } : {}
+            } : {};
 
             return (
                 <div className="controls" style={{transform: `translate(-${rightOffset}px, 0)`}}>
-                    <div className="tools">{options}</div>
+                    <NavControlsToolsList tools={tools} rightOffset={rightOffset} />
                     <button onClick={this.onFit}>{i18n('controls.fit')}</button>
                     <div ref="panner" style={panningStyle} className={panningCls} onMouseDown={this.onPanMouseDown}><div className="arrow-bottom"/><div className="arrow-right"/><div className="arrow-top"/><div className="arrow-left"/></div>
                     <button
@@ -175,7 +153,7 @@ define([
         }
     });
 
-    return NavigationControls;
+    return NavControls;
 
     // Ported from jquery.cytoscape-panzoom plugin
     function eventToPan(bounds, e) {

@@ -10,6 +10,8 @@ define([
     Attacher) {
     'use strict';
 
+    const PADDING = 10;
+
     const ProductControlsOption = createReactClass({
 
         propTypes: {
@@ -24,7 +26,7 @@ define([
         },
 
         render() {
-            const { active, onClick, tool } = this.props;
+            const { active, onClick, tool, rightOffset } = this.props;
             const { props: toolProps, icon, label, identifier, componentPath } = tool;
 
             if (!icon && !label) {
@@ -35,7 +37,8 @@ define([
             return (
                 <li
                     className={classNames('controls-option', { active })}
-                    onClick={onClick}
+                    onClick={this.onOptionClick}
+                    ref={(ref) => { this.option = ref }}
                 >
                     <div className="button">
                         { icon ?
@@ -43,16 +46,40 @@ define([
                         : null}
                         <span>{label}</span>
                     </div>
-                    <div style={{display: (active ? 'block' : 'none')}} className="option-container">
+                    <div
+                        style={{display: (active ? 'block' : 'none')}}
+                        className="option-container"
+                        ref={(ref) => { this.popover = ref }}
+                    >
                        {active ? <Attacher
                             key={identifier}
                             componentPath={componentPath}
+                            afterAttach={this.positionPopover}
                             {...(toolProps || {})}
                        /> : null}
                     </div>
-
+                    <div className="arrow top"></div>
                 </li>
             );
+        },
+
+        onOptionClick(event) {
+            if (!$(event.target).closest('.option-container').length) {
+                this.props.onClick();
+            }
+        },
+
+        positionPopover(attacher) {
+            const rightOffset = this.props.rightOffset;
+            const { left: optionLeft, width: optionWidth, right: optionRight } = this.option.getBoundingClientRect();
+            const { left, right, width } = this.popover.getBoundingClientRect();
+            const windowWidth = $(window).width();
+            const maxLeft = windowWidth - width - PADDING - rightOffset;
+            const currentOffset = $(this.popover).offset();
+            const positionLeft = Math.min(optionLeft, maxLeft);
+
+            $(this.arrow).offset({ top: $(this.arrow).offset.top, left: (optionLeft + (optionWidth / 2))});
+            $(this.popover).offset({ top: currentOffset.top, left: Math.max(positionLeft, 40) }); //menubar width
         }
     });
 

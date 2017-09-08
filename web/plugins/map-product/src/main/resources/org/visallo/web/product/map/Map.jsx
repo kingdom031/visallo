@@ -28,6 +28,32 @@ define([
         },
         'http://docs.visallo.org/extension-points/front-end/mapOptions'
     );
+        registry.registerExtension('org.visallo.map.options', {
+            identifier: 'relationshipLabels',
+            placementHint: 'button',
+            label: 'Relationship Labels',
+            icon: 'img/glyphicons/glyphicons_439_wrench@2x.png',
+            optionComponentPath: 'components/Alert'
+        });
+        registry.registerExtension('org.visallo.map.options', {
+            identifier: 'textOnly',
+            placementHint: 'button',
+            label: 'Text only',
+            optionComponentPath: 'components/Alert'
+        });
+        registry.registerExtension('org.visallo.map.options', {
+            identifier: 'iconOnly',
+            placementHint: 'button',
+            icon: 'img/glyphicons/glyphicons_001_leaf@2x.png',
+            optionComponentPath: 'components/Alert'
+        });
+        registry.registerExtension('org.visallo.map.options', {
+            identifier: 'styles',
+            placementHint: 'button',
+            label: 'Style',
+            icon: 'img/glyphicons/glyphicons_009_magic@2x.png',
+            optionComponentPath: 'components/Alert'
+        });
 
     const Map = createReactClass({
 
@@ -127,11 +153,14 @@ define([
         },
 
         getTools() {
-            return this.props.registry['org.visallo.map.options'].map(e => ({
-                identifier: e.identifier,
-                componentPath: e.optionComponentPath, //TODO: fix shape
-                product: this.props.product
-            }));
+            return this.props.registry['org.visallo.map.options'].map(e => {
+                const { optionComponentPath: componentPath, ...option } = e;
+                return ({
+                    product: this.props.product,
+                    componentPath: e.optionComponentPath,
+                    ...option
+                });
+            });
         },
 
         onViewport(event) {

@@ -42,31 +42,36 @@ define([
             }
         },
 
-        onItemClick(identifier) {
-            const activeOption = this.state.activeOption;
-            this.setState({
-                activeOption: activeOption === identifier ? null : identifier
-            });
+        componentDidMount() {
+            //esc
+        },
+
+        componentWillUnmount() {
+            //esc off
         },
 
         render() {
             const { activeOption } = this.state;
-            const { onFit, tools } = this.props;
+            const { onFit, tools, rightOffset } = this.props;
             const toolsByType = _.groupBy(tools, (tool) => tool.placementHint || placementHint.MENU);
 
             return (
                     <div className="controls-list">
-                        <ul className="extensions">
-                            {toolsByType[placementHint.BUTTON] ? toolsByType[placementHint.BUTTON].map(tool =>
-                                <ProductControlsOption
-                                    tool={tool}
-                                    active={activeOption === tool.identifier}
-                                    key={tool.identifier}
-                                    onClick={() => {this.onItemClick(tool.identifier) }}
-                                />
-                            ) : null}
-                        </ul>
+                        {toolsByType[placementHint.BUTTON] ?
+                            <ul className="extensions">
+                                {toolsByType[placementHint.BUTTON].map(tool => (
+                                    <ProductControlsOption
+                                        tool={tool}
+                                        active={activeOption === tool.identifier}
+                                        key={tool.identifier}
+                                        onClick={() => {this.onItemClick(tool.identifier) }}
+                                        rightOffset={rightOffset}
+                                    />
+                                ))}
+                            </ul>
+                        : null}
                         <div className="controls-menu-container">
+                            <div className="button fit" onClick={onFit}>{i18n('controls.fit')}</div>
                             {toolsByType[placementHint.MENU] ?
                                 <ProductControlsMenu
                                     options={toolsByType[placementHint.MENU]}
@@ -74,10 +79,16 @@ define([
                                     onToggle={() => { this.onItemClick(MENU_IDENTIFIER) }}
                                 />
                             : null}
-                            <div className="button fit" onClick={onFit}>{i18n('controls.fit')}</div>
                         </div>
                     </div>
             );
+        },
+
+        onItemClick(identifier) {
+            const activeOption = this.state.activeOption;
+            this.setState({
+                activeOption: activeOption === identifier ? null : identifier
+            });
         }
     });
 

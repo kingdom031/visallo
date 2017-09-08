@@ -43,9 +43,10 @@ define([
         },
 
         render() {
-            const panningCls = 'panner' + (this.state.panning ? ' active' : '');
-            const panningStyle = this.state.panning && this.state.pan ? {
-                    background: `radial-gradient(circle at ${calculatePosition(this.state.pan)}, #575757, #929292 60%)`
+            const { panning, pan } = this.state;
+            const panningCls = 'panner' + (panning ? ' active' : '');
+            const panningStyle = panning && pan ? {
+                    background: `radial-gradient(circle at ${calculatePosition(pan)}, #575757, #929292 60%)`
             } : {};
 
             return (

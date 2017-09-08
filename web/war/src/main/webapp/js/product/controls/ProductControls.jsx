@@ -41,10 +41,10 @@ define([
 
             return (
                 <div className="product-controls" style={{transform: `translate(-${rightOffset}px, 0)`}}>
-                    <ProductControlsList tools={tools} onFit={onFit} />
                     {onZoom || onPan ?
                         <NavigationControls {...navigationProps} />
                     : null}
+                    <ProductControlsList tools={tools} onFit={onFit} rightOffset={rightOffset} />
                 </div>
             );
         },

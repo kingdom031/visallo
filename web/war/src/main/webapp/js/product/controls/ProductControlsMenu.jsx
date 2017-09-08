@@ -22,8 +22,7 @@ define([
                     <button
                         className={active ? 'active' : ''}
                         onClick={onToggle}
-                        title={i18n('controls.options.toggle')}
-                    ></button>
+                        title={i18n('controls.options.toggle')}>Option</button>
                     <div style={{display: (active ? 'block' : 'none')}} className="option-container">
                         <ul>{
                             options.map(option => {

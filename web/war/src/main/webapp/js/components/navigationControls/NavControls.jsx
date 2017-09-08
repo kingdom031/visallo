@@ -2,12 +2,12 @@ define([
     'create-react-class',
     'prop-types',
     '../Attacher',
-    './NavControlsToolsList'
+    './NavControlsList'
 ], function(
     createReactClass,
     PropTypes,
     Attacher,
-    NavControlsToolsList) {
+    NavControlsList) {
     'use strict';
 
     const PAN_INACTIVE_AREA = 8;
@@ -72,17 +72,32 @@ define([
 
             return (
                 <div className="controls" style={{transform: `translate(-${rightOffset}px, 0)`}}>
-                    <NavControlsToolsList tools={tools} rightOffset={rightOffset} />
-                    <button onClick={this.onFit}>{i18n('controls.fit')}</button>
-                    <div ref="panner" style={panningStyle} className={panningCls} onMouseDown={this.onPanMouseDown}><div className="arrow-bottom"/><div className="arrow-right"/><div className="arrow-top"/><div className="arrow-left"/></div>
+                    <NavControlsList tools={tools} onFit={this.onFit} />
+                    <div
+                        ref="panner"
+                        style={panningStyle}
+                        className={panningCls}
+                        onMouseDown={this.onPanMouseDown}
+                    >
+                        <div className="arrow-bottom"/>
+                        <div className="arrow-right"/>
+                        <div className="arrow-top"/>
+                        <div className="arrow-left"/>
+                    </div>
                     <button
                         onMouseDown={this.onZoom}
                         onMouseUp={this.onZoom}
-                        className="zoom" data-type="out">-</button>
+                        className="zoom" data-type="out"
+                    >
+                        -
+                    </button>
                     <button
                         onMouseDown={this.onZoom}
                         onMouseUp={this.onZoom}
-                        className="zoom" data-type="in">+</button>
+                        className="zoom" data-type="in"
+                    >
+                        +
+                    </button>
                 </div>
             );
         },

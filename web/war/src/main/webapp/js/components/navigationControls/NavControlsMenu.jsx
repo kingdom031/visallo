@@ -5,7 +5,7 @@ define([
 ], function(createReactClass, PropTypes, Attacher) {
     'use strict';
 
-    const NavControlsOptions = createReactClass({
+    const NavControlsMenu = createReactClass({
 
         propTypes: {
             //TODO
@@ -13,13 +13,16 @@ define([
 
         render() {
             const { active, options, onToggle } = this.props;
+            if (_.isEmpty(options)) {
+                return null;
+            }
 
             return (
-                <li ref="options" className="options">
+                <div className="controls-menu">
                     <button className={active ? 'active' : ' '}
-                        onClick={() => onToggle('options')}
-                        title={i18n('controls.options.toggle')}>Options</button>
-                    <div style={{display: (active ? 'block' : 'none')}} className="options-container">
+                        onClick={onToggle}
+                        title={i18n('controls.options.toggle')}>Options{/*TODO i18n*/}</button>
+                    <div style={{display: (active ? 'block' : 'none')}} className="controls-menu-option">
                         <ul>{
                             options.map(option => {
                                 return <Attacher
@@ -30,10 +33,10 @@ define([
                             })
                         }</ul>
                     </div>
-                </li>
+                </div>
             );
         }
     });
 
-    return NavControlsOptions;
+    return NavControlsMenu;
 });

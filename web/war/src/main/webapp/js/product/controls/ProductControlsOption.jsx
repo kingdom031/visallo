@@ -2,7 +2,7 @@ define([
     'create-react-class',
     'prop-types',
     'classnames',
-    '../Attacher'
+    'components/Attacher'
 ], function(
     createReactClass,
     PropTypes,
@@ -10,27 +10,25 @@ define([
     Attacher) {
     'use strict';
 
-    const NavControlsButton = createReactClass({
+    const ProductControlsOption = createReactClass({
 
         propTypes: {
             tool: PropTypes.shape({
                 identifier: PropTypes.string.isRequired,
                 componentPath: PropTypes.string.isRequired,
-                button: PropTypes.shape({
-                    icon: PropTypes.string,
-                    label: PropTypes.string
-                }),
+                placementHint: PropTypes.string,
+                icon: PropTypes.string,
+                label: PropTypes.string,
                 props: PropTypes.object
-            })
+            }) //TODO
         },
 
         render() {
             const { active, onClick, tool } = this.props;
-            const { props: toolProps, button, identifier, componentPath } = tool;
-            const { icon, label } = button;
+            const { props: toolProps, icon, label, identifier, componentPath } = tool;
 
             if (!icon && !label) {
-                console.warn(tool.identifier + 'option supplied but no button configuration was given');
+                console.warn(tool.identifier + 'option supplied. One of "icon" or "label" is required');
                 return null;
             }
 
@@ -41,16 +39,16 @@ define([
                 >
                     <div className="button">
                         { icon ?
-                            <div className="tool-icon" style={{backgroundImage: `url(${icon})`}}></div>
+                            <div className="option-icon" style={{backgroundImage: `url(${icon})`}}></div>
                         : null}
                         <span>{label}</span>
                     </div>
                     <div style={{display: (active ? 'block' : 'none')}} className="option-container">
-                       <Attacher
+                       {active ? <Attacher
                             key={identifier}
                             componentPath={componentPath}
                             {...(toolProps || {})}
-                       />
+                       /> : null}
                     </div>
 
                 </li>
@@ -58,5 +56,5 @@ define([
         }
     });
 
-    return NavControlsButton;
+    return ProductControlsOption;
 });

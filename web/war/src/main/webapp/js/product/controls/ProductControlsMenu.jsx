@@ -1,11 +1,11 @@
 define([
     'create-react-class',
     'prop-types',
-    '../Attacher'
+    'components/Attacher'
 ], function(createReactClass, PropTypes, Attacher) {
     'use strict';
 
-    const NavControlsMenu = createReactClass({
+    const ProductControlsMenu = createReactClass({
 
         propTypes: {
             //TODO
@@ -19,10 +19,12 @@ define([
 
             return (
                 <div className="controls-menu">
-                    <button className={active ? 'active' : ' '}
+                    <button
+                        className={active ? 'active' : ''}
                         onClick={onToggle}
-                        title={i18n('controls.options.toggle')}>Options{/*TODO i18n*/}</button>
-                    <div style={{display: (active ? 'block' : 'none')}} className="controls-menu-option">
+                        title={i18n('controls.options.toggle')}
+                    ></button>
+                    <div style={{display: (active ? 'block' : 'none')}} className="option-container">
                         <ul>{
                             options.map(option => {
                                 return <Attacher
@@ -38,5 +40,5 @@ define([
         }
     });
 
-    return NavControlsMenu;
+    return ProductControlsMenu;
 });

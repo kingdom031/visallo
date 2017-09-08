@@ -1,13 +1,9 @@
 define([
     'create-react-class',
-    'prop-types',
-    '../Attacher',
-    './NavControlsList'
+    'prop-types'
 ], function(
     createReactClass,
-    PropTypes,
-    Attacher,
-    NavControlsList) {
+    PropTypes) {
     'use strict';
 
     const PAN_INACTIVE_AREA = 8;
@@ -20,32 +16,23 @@ define([
     const STATE_END = { state: 'panningEnd' };
     const EMPTY = { x: 0, y: 0 };
 
-    const NavControls = createReactClass({
+    const NavigationControls = createReactClass({
 
         propTypes: {
             zoom: PropTypes.bool,
             pan: PropTypes.bool,
-            tools: PropTypes.arrayOf(PropTypes.shape({
-                identifier: PropTypes.string.isRequired,
-                componentPath: PropTypes.string.isRequired,
-                props: PropTypes.object
-            })),
-            rightOffset: PropTypes.number,
             onZoom: PropTypes.func,
-            onPan: PropTypes.func,
-            onFit: PropTypes.func
+            onPan: PropTypes.func
         },
 
         getDefaultProps() {
-            const noop = () => {}
+            const noop = () => {};
+
             return {
                 zoom: true,
                 pan: true,
-                tools: [],
-                rightOffset: 0,
                 onZoom: noop,
-                onPan: noop,
-                onFit: noop
+                onPan: noop
             }
         },
 
@@ -55,24 +42,14 @@ define([
             }
         },
 
-        componentDidMount() {
-            //TODO: esc keyup close
-        },
-
-        componentWillUnmount() {
-            //TODO: off esc keyup close
-        },
-
         render() {
-            const { tools, rightOffset } = this.props;
             const panningCls = 'panner' + (this.state.panning ? ' active' : '');
             const panningStyle = this.state.panning && this.state.pan ? {
                     background: `radial-gradient(circle at ${calculatePosition(this.state.pan)}, #575757, #929292 60%)`
             } : {};
 
             return (
-                <div className="controls" style={{transform: `translate(-${rightOffset}px, 0)`}}>
-                    <NavControlsList tools={tools} onFit={this.onFit} />
+                <div className="navigation-controls">
                     <div
                         ref="panner"
                         style={panningStyle}
@@ -110,10 +87,6 @@ define([
             window.addEventListener('mouseup', this._handlePanUp, false);
 
             this.setState({ panning: true })
-        },
-
-        onFit(event) {
-            this.props.onFit();
         },
 
         onZoom(event) {
@@ -168,7 +141,7 @@ define([
         }
     });
 
-    return NavControls;
+    return NavigationControls;
 
     // Ported from jquery.cytoscape-panzoom plugin
     function eventToPan(bounds, e) {
@@ -210,5 +183,4 @@ define([
         const position = `${toPercent(cX)}% ${toPercent(cY)}%`
         return position
     }
-
 });

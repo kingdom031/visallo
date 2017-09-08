@@ -388,12 +388,14 @@ define([
              * @property {object} cy The cytoscape instance
              * @property {object} product The graph product
              */
-            return this.props.registry['org.visallo.graph.options'].map(e => ({
-                identifier: e.identifier,
-                componentPath: e.optionComponentPath,
-                product: this.props.product,
-                button: e.button
-            }));
+            return this.props.registry['org.visallo.graph.options'].map(e => {
+                const { optionComponentPath: componentPath, ...option } = e;
+                return ({
+                    product: this.props.product,
+                    componentPath,
+                    ...option
+                });
+            });
         },
 
         onReady({ cy }) {

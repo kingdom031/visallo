@@ -6,7 +6,7 @@ define([
     'cytoscape-dagre',
     'dagre',
     'fast-json-patch',
-    'components/navigationControls/NavControls',
+    'product/controls/ProductControls',
     'colorjs',
     './betterGrid',
     './Menu',
@@ -19,7 +19,7 @@ define([
     cytoscapeDagre,
     dagre,
     jsonpatch,
-    NavControls,
+    ProductControls,
     colorjs,
     betterGrid,
     Menu,
@@ -316,7 +316,7 @@ define([
                 <div onMouseDown={this.onMouseDown} style={{height: '100%'}}>
                     <div style={{height: '100%'}} ref="cytoscape"></div>
                     {this.state.cy ? (
-                        <NavControls
+                        <ProductControls
                             rightOffset={this.props.panelPadding.right}
                             tools={this.injectToolProps()}
                             onFit={this.onControlsFit}

@@ -2,7 +2,7 @@ var path = require('path');
 var webpack = require('webpack');
 var VisalloAmdExternals = [
     'components/DroppableHOC',
-    'components/navigationControls/NavControls',
+    'product/controls/ProductControls',
     'components/RegistryInjectorHOC',
     'components/Attacher',
     'configuration/plugins/registry',

@@ -1,22 +1,22 @@
 define([
     'create-react-class',
     'prop-types',
-    './NavControlsOption',
-    './NavControlsMenu'
+    './ProductControlsOption',
+    './ProductControlsMenu'
 ], function(
     createReactClass,
     PropTypes,
-    NavControlsOption,
-    NavControlsMenu) {
+    ProductControlsOption,
+    ProductControlsMenu) {
     'use strict';
 
-    const displayType = {
-        ITEM: 'item',
+    const placementHint = {
+        MENU: 'menu',
         BUTTON: 'button'
     };
-    const OPTIONS_IDENTIFIER = 'options';
+    const MENU_IDENTIFIER = 'menu';
 
-    const NavControlsList = createReactClass({
+    const ProductControlsList = createReactClass({
 
         propTypes: {
             tools: PropTypes.arrayOf(PropTypes.shape({
@@ -51,35 +51,35 @@ define([
 
         render() {
             const { activeOption } = this.state;
-            const { onFit } = this.props;
-            const tools = _.groupBy(this.props.tools, (tool) => tool.button ? displayType.BUTTON : displayType.ITEM);
+            const { onFit, tools } = this.props;
+            const toolsByType = _.groupBy(tools, (tool) => tool.placementHint || placementHint.MENU);
 
             return (
                     <div className="controls-list">
-                        <ul>
-                            {tools[displayType.BUTTON].map(tool =>
-                                <NavControlsOption
+                        <ul className="extensions">
+                            {toolsByType[placementHint.BUTTON] ? toolsByType[placementHint.BUTTON].map(tool =>
+                                <ProductControlsOption
                                     tool={tool}
                                     active={activeOption === tool.identifier}
                                     key={tool.identifier}
                                     onClick={() => {this.onItemClick(tool.identifier) }}
                                 />
-                            )}
+                            ) : null}
                         </ul>
                         <div className="controls-menu-container">
-                            {tools[displayType.ITEM] ?
-                                <NavControlsMenu
-                                    options={tools[displayType.ITEM]}
-                                    active={activeOption === OPTIONS_IDENTIFIER}
-                                    onToggle={() => { this.onItemClick(OPTIONS_IDENTIFIER) }}
+                            {toolsByType[placementHint.MENU] ?
+                                <ProductControlsMenu
+                                    options={toolsByType[placementHint.MENU]}
+                                    active={activeOption === MENU_IDENTIFIER}
+                                    onToggle={() => { this.onItemClick(MENU_IDENTIFIER) }}
                                 />
                             : null}
-                            <button onClick={onFit}>{i18n('controls.fit')}</button>
+                            <div className="button fit" onClick={onFit}>{i18n('controls.fit')}</div>
                         </div>
                     </div>
             );
         }
     });
 
-    return NavControlsList;
+    return ProductControlsList;
 });

@@ -129,7 +129,7 @@ define([
         getTools() {
             return this.props.registry['org.visallo.map.options'].map(e => ({
                 identifier: e.identifier,
-                componentPath: e.optionComponentPath,
+                componentPath: e.optionComponentPath, //TODO: fix shape
                 product: this.props.product
             }));
         },

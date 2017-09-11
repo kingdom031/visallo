@@ -31,14 +31,19 @@ define([
     'use strict';
 
     /**
-     * Plugin to add custom options components (Flight or React) which display in the graph options menu (next to Fit)
-     * when its opened.
+     * Plugin to add custom options components (Flight or React) which display in the graph options toolbar in the top right.
      *
      * @param {string} identifier Unique id for this option item
      * @param {string} optionComponentPath Path to {@link org.visallo.graph.options~Component} to render
+     * @param {string} [placementHint=menu] How this should be rendered in the toolbar
+     * * `menu` inside the hamburger menu list
+     * * `button` as a button that will expand a popover where the component is rendered.
+     *   If specified one of `icon` or `label` is required
+     * @param {string} [icon] Path to the icon to render when displayed as a `button`
+     * @param {string} [label] Label text to render when displayed as a `button`
      */
     registry.documentExtensionPoint('org.visallo.graph.options',
-        'Add components to graph options dropdown',
+        'Add components to the graph options toolbar',
         function(e) {
             return ('identifier' in e) && ('optionComponentPath' in e);
         },

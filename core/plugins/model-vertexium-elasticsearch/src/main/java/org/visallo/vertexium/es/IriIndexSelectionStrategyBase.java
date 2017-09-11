@@ -2,10 +2,10 @@ package org.visallo.vertexium.es;
 
 import org.elasticsearch.action.admin.indices.stats.IndexStats;
 import org.vertexium.*;
-import org.vertexium.elasticsearch.DefaultIndexSelectionStrategy;
-import org.vertexium.elasticsearch.ElasticSearchSingleDocumentSearchQueryBase;
-import org.vertexium.elasticsearch.ElasticsearchDocumentType;
-import org.vertexium.elasticsearch.ElasticsearchSingleDocumentSearchIndex;
+import org.vertexium.elasticsearch5.DefaultIndexSelectionStrategy;
+import org.vertexium.elasticsearch5.ElasticsearchSearchQueryBase;
+import org.vertexium.elasticsearch5.ElasticsearchDocumentType;
+import org.vertexium.elasticsearch5.Elasticsearch5SearchIndex;
 import org.vertexium.query.QueryBase;
 import org.visallo.core.model.properties.VisalloProperties;
 
@@ -32,12 +32,12 @@ public abstract class IriIndexSelectionStrategyBase extends DefaultIndexSelectio
     }
 
     @Override
-    public String[] getIndicesToQuery(ElasticsearchSingleDocumentSearchIndex elasticSearchSearchIndexBase) {
+    public String[] getIndicesToQuery(Elasticsearch5SearchIndex elasticSearchSearchIndexBase) {
         return indiciesToQuery;
     }
 
     @Override
-    public String getIndexName(ElasticsearchSingleDocumentSearchIndex elasticSearchSearchIndexBase, Element element) {
+    public String getIndexName(Elasticsearch5SearchIndex elasticSearchSearchIndexBase, Element element) {
         if (element instanceof Vertex) {
             String conceptType = VisalloProperties.CONCEPT_TYPE.getPropertyValue(element);
             if (conceptType != null) {
@@ -65,24 +65,24 @@ public abstract class IriIndexSelectionStrategyBase extends DefaultIndexSelectio
     }
 
     @Override
-    public String[] getIndexNames(ElasticsearchSingleDocumentSearchIndex es, PropertyDefinition propertyDefinition) {
+    public String[] getIndexNames(Elasticsearch5SearchIndex es, PropertyDefinition propertyDefinition) {
         return getManagedIndexNames(es);
     }
 
     @Override
-    public boolean isIncluded(ElasticsearchSingleDocumentSearchIndex es, String indexName) {
+    public boolean isIncluded(Elasticsearch5SearchIndex es, String indexName) {
         return indexPrefix.startsWith(indexPrefix);
     }
 
     @Override
-    public String[] getManagedIndexNames(ElasticsearchSingleDocumentSearchIndex es) {
+    public String[] getManagedIndexNames(Elasticsearch5SearchIndex es) {
         Map<String, IndexStats> indices = es.getClient().admin().indices().prepareStats().execute().actionGet().getIndices();
         Set<String> indexNames = indices.keySet();
         return indexNames.toArray(new String[indexNames.size()]);
     }
 
     @Override
-    public String[] getIndicesToQuery(ElasticSearchSingleDocumentSearchQueryBase query, EnumSet<ElasticsearchDocumentType> elementType) {
+    public String[] getIndicesToQuery(ElasticsearchSearchQueryBase query, EnumSet<ElasticsearchDocumentType> elementType) {
         for (QueryBase.HasContainer hasContainer : query.getParameters().getHasContainers()) {
             if (hasContainer instanceof QueryBase.HasValueContainer) {
                 QueryBase.HasValueContainer hasValueContainer = (QueryBase.HasValueContainer) hasContainer;

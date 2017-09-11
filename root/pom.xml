@@ -63,7 +63,7 @@
         <commons.lang3.version>3.4</commons.lang3.version>
         <commons.httpclient.version>3.1</commons.httpclient.version>
         <curator.version>2.11.0</curator.version>
-        <elasticsearch.version>1.7.5</elasticsearch.version>
+        <elasticsearch.version>5.3.3</elasticsearch.version>
         <evo.inflector.version>1.0.1</evo.inflector.version>
         <guice.version>4.1.0</guice.version>
         <visallo.closure.compiler.version>1.0.0</visallo.closure.compiler.version>
@@ -76,9 +76,9 @@
         <javax.servlet.api.version>3.1.0</javax.servlet.api.version>
         <json.version>20131018</json.version>
         <lesscss.version>1.3.3</lesscss.version>
-        <log4j.version>1.2.17</log4j.version>
+        <log4j.version>2.9.0</log4j.version>
         <metrics.version>3.0.2</metrics.version>
-        <vertexium.version>2.6.1</vertexium.version>
+        <vertexium.version>3.0.0-SNAPSHOT</vertexium.version>
         <simple-orm.version>1.3.0</simple-orm.version>
         <groovy.version>2.4.5</groovy.version>
         <zip4j.version>1.3.1</zip4j.version>
@@ -364,6 +364,12 @@
                 <groupId>org.apache.zookeeper</groupId>
                 <artifactId>zookeeper</artifactId>
                 <version>${zookeeper.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.curator</groupId>
@@ -433,6 +439,12 @@
                 <groupId>org.apache.accumulo</groupId>
                 <artifactId>accumulo-tracer</artifactId>
                 <version>${accumulo.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -460,6 +472,10 @@
                     <exclusion>
                         <groupId>org.apache.httpcomponents</groupId>
                         <artifactId>httpclient</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -557,6 +573,12 @@
                 <groupId>org.vertexium</groupId>
                 <artifactId>vertexium-core</artifactId>
                 <version>${vertexium.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.vertexium</groupId>
@@ -570,7 +592,7 @@
             </dependency>
             <dependency>
                 <groupId>org.vertexium</groupId>
-                <artifactId>vertexium-elasticsearch-singledocument</artifactId>
+                <artifactId>vertexium-elasticsearch5</artifactId>
                 <version>${vertexium.version}</version>
             </dependency>
             <dependency>
@@ -588,6 +610,12 @@
                 <artifactId>vertexium-test</artifactId>
                 <version>${vertexium.version}</version>
                 <scope>test</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.vertexium</groupId>
@@ -679,15 +707,27 @@
 
             <!-- Runtime Dependencies -->
             <dependency>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
                 <version>${log4j.version}</version>
                 <scope>runtime</scope>
             </dependency>
             <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-log4j12</artifactId>
-                <version>${slf4j.version}</version>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>${log4j.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-slf4j-impl</artifactId>
+                <version>${log4j.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-1.2-api</artifactId>
+                <version>${log4j.version}</version>
                 <scope>runtime</scope>
             </dependency>
 

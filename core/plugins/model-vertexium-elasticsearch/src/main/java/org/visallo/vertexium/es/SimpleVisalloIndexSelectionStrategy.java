@@ -3,7 +3,7 @@ package org.visallo.vertexium.es;
 import org.vertexium.Element;
 import org.vertexium.ExtendedDataRowId;
 import org.vertexium.GraphConfiguration;
-import org.vertexium.elasticsearch.ElasticsearchSingleDocumentSearchIndex;
+import org.vertexium.elasticsearch5.Elasticsearch5SearchIndex;
 import org.visallo.core.model.user.UserRepository;
 import org.visallo.core.model.workspace.WorkspaceRepository;
 
@@ -30,12 +30,12 @@ public class SimpleVisalloIndexSelectionStrategy extends IriIndexSelectionStrate
     }
 
     @Override
-    public String getExtendedDataIndexName(ElasticsearchSingleDocumentSearchIndex es, Element element, String tableName, String rowId) {
+    public String getExtendedDataIndexName(Elasticsearch5SearchIndex es, Element element, String tableName, String rowId) {
         return encodeIndexName("extdata_" + tableName);
     }
 
     @Override
-    public String getExtendedDataIndexName(ElasticsearchSingleDocumentSearchIndex es, ExtendedDataRowId rowId) {
+    public String getExtendedDataIndexName(Elasticsearch5SearchIndex es, ExtendedDataRowId rowId) {
         return encodeIndexName("extdata_" + rowId.getTableName());
     }
 }

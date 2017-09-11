@@ -22,7 +22,11 @@ define([
                 icon: PropTypes.string,
                 label: PropTypes.string,
                 props: PropTypes.object
-            }) //TODO
+            }),
+            active: PropTypes.bool,
+            key: PropTypes.string.isRequired,
+            onClick: PropTypes.func,
+            rightOffset: PropTypes.number
         },
 
         render() {

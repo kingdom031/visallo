@@ -27,7 +27,9 @@ define([
                     label: PropTypes.string
                 }),
                 props: PropTypes.object
-            }))
+            })),
+            onFit: PropTypes.func,
+            rightOffset: PropTypes.number
         },
 
         getDefaultProps() {

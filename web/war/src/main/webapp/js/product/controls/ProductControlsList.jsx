@@ -43,11 +43,15 @@ define([
         },
 
         componentDidMount() {
-            //esc
+            $(document).on('keydown.org-visallo-graph-product-controls', (event) => {
+                if (event.which === 27) { //esc
+                    this.setState({ activeOption: null });
+                }
+            });
         },
 
         componentWillUnmount() {
-            //esc off
+            $(document).off('keydown.org-visallo-graph-product-controls');
         },
 
         render() {

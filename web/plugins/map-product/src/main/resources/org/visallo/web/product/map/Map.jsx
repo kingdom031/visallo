@@ -28,32 +28,6 @@ define([
         },
         'http://docs.visallo.org/extension-points/front-end/mapOptions'
     );
-        registry.registerExtension('org.visallo.map.options', {
-            identifier: 'relationshipLabels',
-            placementHint: 'button',
-            label: 'Relationship Labels',
-            icon: 'img/glyphicons/glyphicons_439_wrench@2x.png',
-            optionComponentPath: 'components/Alert'
-        });
-        registry.registerExtension('org.visallo.map.options', {
-            identifier: 'textOnly',
-            placementHint: 'button',
-            label: 'Text only',
-            optionComponentPath: 'components/Alert'
-        });
-        registry.registerExtension('org.visallo.map.options', {
-            identifier: 'iconOnly',
-            placementHint: 'button',
-            icon: 'img/glyphicons/glyphicons_001_leaf@2x.png',
-            optionComponentPath: 'components/Alert'
-        });
-        registry.registerExtension('org.visallo.map.options', {
-            identifier: 'styles',
-            placementHint: 'button',
-            label: 'Style',
-            icon: 'img/glyphicons/glyphicons_009_magic@2x.png',
-            optionComponentPath: 'components/Alert'
-        });
 
     const Map = createReactClass({
 

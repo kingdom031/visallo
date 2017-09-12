@@ -12,7 +12,8 @@ define([
 
     const placementHint = {
         MENU: 'menu',
-        BUTTON: 'button'
+        BUTTON: 'button',
+        DROPDOWN: 'dropdown'
     };
     const MENU_IDENTIFIER = 'menu';
 
@@ -58,14 +59,31 @@ define([
 
         render() {
             const { activeOption } = this.state;
-            const { onFit, tools, rightOffset } = this.props;
-            const toolsByType = _.groupBy(tools, (tool) => tool.placementHint || placementHint.MENU);
+            const { onFit, onZoom, tools, rightOffset } = this.props;
+            const menuOptions = [], listOptions = [];
+            const groupByPlacement = (tool) => {
+               const { placementHint, icon, label, componentPath, handler } = tool;
+
+               if (placementHint) {
+                   if (placementHint === placementHint.MENU) {
+                       menuOptions.push(tool);
+                   } else {
+                       listOptions.push(tool);
+                   }
+               } else if (icon || label || handler) {
+                   listOptions.push(tool);
+               } else {
+                   menuOptions.push(tool);
+               }
+            };
+
+            tools.concat(this.getDefaultOptions()).forEach(groupByPlacement);
 
             return (
                     <div className="controls-list">
-                        {toolsByType[placementHint.BUTTON] ?
+                        {listOptions.length ?
                             <ul className="extensions">
-                                {toolsByType[placementHint.BUTTON].map(tool => (
+                                {listOptions.map(tool => (
                                     <ProductControlsOption
                                         tool={tool}
                                         active={activeOption === tool.identifier}
@@ -76,25 +94,57 @@ define([
                                 ))}
                             </ul>
                         : null}
-                        <div className="controls-menu-container">
-                            <div className="button fit" onClick={onFit}>{i18n('controls.fit')}</div>
-                            {toolsByType[placementHint.MENU] ?
-                                <ProductControlsMenu
-                                    options={toolsByType[placementHint.MENU]}
-                                    active={activeOption === MENU_IDENTIFIER}
-                                    onToggle={() => { this.onItemClick(MENU_IDENTIFIER) }}
-                                />
-                            : null}
-                        </div>
+                        {menuOptions.length ?
+                            <ProductControlsMenu
+                                options={menuOptions}
+                                active={activeOption === MENU_IDENTIFIER}
+                                onToggle={() => { this.onItemClick(MENU_IDENTIFIER) }}
+                            />
+                        : null}
                     </div>
             );
         },
 
         onItemClick(identifier) {
-            const activeOption = this.state.activeOption;
-            this.setState({
-                activeOption: activeOption === identifier ? null : identifier
-            });
+            if (identifier) {
+                const activeOption = this.state.activeOption;
+
+                this.setState({
+                    activeOption: activeOption === identifier ? null : identifier
+                });
+            }
+        },
+
+        getDefaultOptions() {
+            const defaultOptions = [];
+            const { onZoom, onFit } = this.props;
+
+            if (onZoom) {
+                defaultOptions.push({
+                    identifier: 'org-visallo-product-zoom-in',
+                    placementHint: 'button',
+                    label: '+',
+                    props: { handler: _.partial(onZoom, 'in') },
+                    buttonClass: 'zoom'
+                }, {
+                    identifier: 'org-visallo-product-zoom-out',
+                    placementHint: 'button',
+                    label: '-',
+                    props: { handler: _.partial(onZoom, 'out') },
+                    buttonClass: 'zoom'
+                })
+            }
+
+            if (onFit) {
+                defaultOptions.push({
+                    identifier: 'org-visallo-product-fit',
+                    placementHint: 'button',
+                    label: 'Fit',
+                    props: { handler: onFit}
+                })
+            }
+
+            return defaultOptions;
         }
     });
 

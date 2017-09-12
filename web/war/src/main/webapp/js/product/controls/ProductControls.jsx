@@ -11,6 +11,9 @@ define([
     NavigationControls,
     ProductControlsList) {
     'use strict';
+    const navigationButtons = [
+        { identifier: 'product-navigation-zoom-in', }
+    ];
 
     const ProductControls = createReactClass({
 
@@ -18,7 +21,10 @@ define([
             tools: PropTypes.arrayOf(PropTypes.shape({
                 identifier: PropTypes.string.isRequired,
                 componentPath: PropTypes.string.isRequired,
-                props: PropTypes.object
+                props: PropTypes.object,
+                placementHint: PropTypes.string,
+                icon: PropTypes.string,
+                label: PropTypes.string
             })),
             rightOffset: PropTypes.number,
             zoom: PropTypes.bool,
@@ -41,10 +47,7 @@ define([
 
             return (
                 <div className="product-controls" style={{transform: `translate(-${rightOffset}px, 0)`}}>
-                    {onZoom || onPan ?
-                        <NavigationControls {...navigationProps} />
-                    : null}
-                    <ProductControlsList tools={tools} onFit={onFit} rightOffset={rightOffset} />
+                    <ProductControlsList tools={tools} onFit={onFit} rightOffset={rightOffset} onZoom={onZoom} />
                 </div>
             );
         },

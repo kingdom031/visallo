@@ -17,21 +17,19 @@ define([
         propTypes: {
             tool: PropTypes.shape({
                 identifier: PropTypes.string.isRequired,
-                componentPath: PropTypes.string.isRequired,
-                placementHint: PropTypes.string,
+                componentPath: PropTypes.string,
                 icon: PropTypes.string,
                 label: PropTypes.string,
                 props: PropTypes.object
             }),
             active: PropTypes.bool,
-            key: PropTypes.string.isRequired,
             onClick: PropTypes.func,
             rightOffset: PropTypes.number
         },
 
         render() {
             const { active, onClick, tool, rightOffset } = this.props;
-            const { props: toolProps, icon, label, identifier, componentPath } = tool;
+            const { props: toolProps, icon, label, buttonClass, identifier, componentPath } = tool;
 
             if (!icon && !label) {
                 console.warn(tool.identifier + 'option supplied. One of "icon" or "label" is required');
@@ -44,7 +42,7 @@ define([
                     onClick={this.onOptionClick}
                     ref={(ref) => { this.option = ref }}
                 >
-                    <div className="button">
+                    <div className={classNames('button', buttonClass)}>
                         { icon ?
                             <div className="option-icon" style={{backgroundImage: `url(${icon})`}}></div>
                         : null}
@@ -55,7 +53,7 @@ define([
                         className="option-container"
                         ref={(ref) => { this.popover = ref }}
                     >
-                       {active ? <Attacher
+                       {active && componentPath ? <Attacher
                             key={identifier}
                             componentPath={componentPath}
                             afterAttach={this.positionPopover}
@@ -69,7 +67,12 @@ define([
 
         onOptionClick(event) {
             if (!$(event.target).closest('.option-container').length) {
-                this.props.onClick();
+                const toolProps = this.props.tool.props || {};
+                if (_.isFunction(toolProps.handler)) {
+                    toolProps.handler();
+                } else {
+                    this.props.onClick();
+                }
             }
         },
 

@@ -45,6 +45,10 @@ input { .box-shadow(none); }
           span {
             padding-top: 0.1em;
           }
+
+          &.zoom {
+            padding: 0 0.5em;
+          }
         }
 
         &.active {
@@ -58,80 +62,67 @@ input { .box-shadow(none); }
       }
     }
 
-    .controls-menu-container {
-      .disable-text-selection;
-      display: flex;
-      margin: 0 0.5em;
-      align-items: center;
+  .controls-menu {
+    padding: 0 0.25em;
 
-      & > * {
-        margin-left: 0.25em;
+    button {
+      position: relative;
+      margin: 0;
+      background-image: url(../img/glyphicons/glyphicons_157_show_lines@2x.png);
+      background-size: 60%;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-color: @light-bg;
+      font-size: 0;
+      width: 23px;
+      height: 23px;
+      border: 1px solid transparent;
+
+      &.active {
+        background-color: @light-active-bg;
+      }
+      &:hover {
+        background-color: @light-active-bg;
+        border: 1px solid #bbb;
+      }
+    }
+
+    .option-container {
+      white-space: nowrap;
+      right: @padding;
+
+      input {
+        vertical-align: middle;
+        margin: 0 0.25em;
       }
 
-      .fit {
-        padding: 0 0.5em;
-      }
+      ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
 
-      .controls-menu {
-        button {
-          position: relative;
+        li {
+          padding: 0.3em 0.5em;
           margin: 0;
-          background-image: url(../img/glyphicons/glyphicons_157_show_lines@2x.png);
-          background-size: 60%;
-          background-repeat: no-repeat;
-          background-position: center;
-          background-color: @light-bg;
-          font-size: 0;
-          width: 23px;
-          height: 23px;
-          border: 1px solid transparent;
-
-          &.active {
-            background-color: @light-active-bg;
-          }
-          &:hover {
-            background-color: @light-active-bg;
-            border: 1px solid #bbb;
-          }
-        }
-
-        .option-container {
-          white-space: nowrap;
-          right: @padding;
-
-          input {
-            vertical-align: middle;
-            margin: 0 0.25em;
-          }
-
-          ul {
-            list-style: none;
+          label {
+            font-size: inherit;
             margin: 0;
-            padding: 0;
-
-            li {
-              padding: 0.3em 0.5em;
-              margin: 0;
-              label {
-                font-size: inherit;
-                margin: 0;
-              }
-              .group label {
-                display: inline;
-                input {
-                  margin-left: 0.5em;
-                  margin-right: 0.1em;
-                }
-              }
-              .subtitle {
-                font-style: italic;
-                color: #ccc;
-              }
+          }
+          .group label {
+            display: inline;
+            input {
+              margin-left: 0.5em;
+              margin-right: 0.1em;
             }
+          }
+          .subtitle {
+            font-style: italic;
+            color: #ccc;
           }
         }
       }
     }
+  }
 
     .option-container {
       position: absolute;

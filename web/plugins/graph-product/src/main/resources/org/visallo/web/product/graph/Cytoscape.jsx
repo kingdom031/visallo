@@ -357,7 +357,7 @@ define([
             }
         },
 
-        _zoom(factor, dt) {
+        _zoom(factor, dt = 1) {
             const { cy } = this.state;
 
             var zoom = cy._private.zoom,
@@ -484,20 +484,7 @@ define([
         },
 
         onControlsZoom(dir) {
-            const timeStamp = new Date().getTime();
-            var dt = timeStamp - (this.lastTimeStamp || 0);
-            var zoomFactor = this.zoomFactor || 0;
-
-            if (dt < 30) {
-                dt /= 1000;
-                zoomFactor += zoomAcceleration * dt * zoomDamping;
-            } else {
-                dt = 1;
-                zoomFactor = 0.01;
-            }
-            this.zoomFactor = zoomFactor;
-            this.lastTimeStamp = timeStamp;
-            this._zoom(zoomFactor * (dir === 'out' ? -1 : 1), dt);
+            this._zoom(.2 * (dir === 'out' ? -1 : 1));
         },
 
         onControlsPan(pan, options) {

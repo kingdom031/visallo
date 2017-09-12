@@ -13,7 +13,7 @@ define([
     const placementHint = {
         MENU: 'menu',
         BUTTON: 'button',
-        DROPDOWN: 'dropdown'
+        POPOVER: 'popover'
     };
     const MENU_IDENTIFIER = 'menu';
 
@@ -64,7 +64,7 @@ define([
             const { onFit, onZoom, tools, rightOffset } = this.props;
             const menuOptions = [], listOptions = [];
             const groupByPlacement = (tool) => {
-               const { placementHint, icon, label, componentPath, handler } = tool;
+               const { placementHint, icon, label, componentPath } = tool;
 
                if (placementHint) {
                    if (placementHint === placementHint.MENU) {
@@ -72,7 +72,7 @@ define([
                    } else {
                        listOptions.push(tool);
                    }
-               } else if (icon || label || handler) {
+               } else if (icon || label) {
                    listOptions.push(tool);
                } else {
                    menuOptions.push(tool);
@@ -124,19 +124,19 @@ define([
             const { onZoom, onFit } = this.props;
 
             if (onZoom) {
-                defaultOptions.push({
-                    identifier: 'org-visallo-product-zoom-in',
-                    placementHint: 'button',
-                    label: '+',
-                    props: { handler: _.partial(onZoom, 'in') },
-                    buttonClass: 'zoom'
-                }, {
+                defaultOptions.push( {
                     identifier: 'org-visallo-product-zoom-out',
                     placementHint: 'button',
                     label: '-',
                     props: { handler: _.partial(onZoom, 'out') },
                     buttonClass: 'zoom'
-                })
+                }, {
+                    identifier: 'org-visallo-product-zoom-in',
+                    placementHint: 'button',
+                    label: '+',
+                    props: { handler: _.partial(onZoom, 'in') },
+                    buttonClass: 'zoom'
+                });
             }
 
             if (onFit) {

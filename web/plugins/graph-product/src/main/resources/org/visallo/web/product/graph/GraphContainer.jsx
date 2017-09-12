@@ -35,12 +35,13 @@ define([
      *
      * @param {string} identifier Unique id for this option item
      * @param {string} optionComponentPath Path to {@link org.visallo.graph.options~Component} to render
-     * @param {string} [placementHint=menu] How this should be rendered in the toolbar
+     * @param {string} [placementHint=menu] How this should be displayed in the toolbar
      * * `menu` inside the hamburger menu list
-     * * `button` as a button that will expand a popover where the component is rendered.
-     *   If specified one of `icon` or `label` is required
-     * @param {string} [icon] Path to the icon to render when displayed as a `button`
-     * @param {string} [label] Label text to render when displayed as a `button`
+     * * `popover` as a button that will expand a popover where the component is rendered. If specified one of `icon` or `label` is required.
+     * * `button` as an inline button component
+     * @param {string} [buttonClass] Css class to add to the button element
+     * @param {string} [icon] Path to the icon to render when displayed as a `popover`
+     * @param {string} [label] Label text to render when displayed as a `popover`
      */
     registry.documentExtensionPoint('org.visallo.graph.options',
         'Add components to the graph options toolbar',

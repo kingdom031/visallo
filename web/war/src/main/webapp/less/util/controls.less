@@ -48,6 +48,12 @@ input { .box-shadow(none); }
 
           &.zoom {
             padding: 0 0.5em;
+
+            span {
+              font-weight: bold;
+              font-size: 1.2em;
+              padding: 0;
+            }
           }
         }
 
@@ -171,114 +177,6 @@ input { .box-shadow(none); }
       width: 0;
       border: 5px solid transparent;
       border-bottom-color: white;
-    }
-  }
-
-  .navigation-controls {
-    position: absolute;
-    top: 40px;
-    right: 0;
-    margin-right: @padding;
-    @size: 50px;
-    width: @size;
-    opacity: 0.9;
-
-    .panner, button {
-        transition: background-color ease-in-out 0.1s;
-    }
-    .panner.active,
-    .panner:hover {
-        background-color: @dark-active-bg;
-    }
-
-    .zoom {
-        border-top-right-radius: 0;
-        border-bottom-right-radius: 0;
-    }
-    .zoom:last-child {
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 0;
-        border-top-right-radius: 2px;
-        border-bottom-right-radius: 2px;
-    }
-    .panner {
-      cursor: move;
-      width: @size;
-      height: @size;
-      position: relative;
-      margin-bottom: 0.5em;
-      border-radius: @size;
-      background: @dark-bg;
-      .box-sizing(border-box);
-
-      @base: 4px;
-      @height: 14px;
-      @moveDelta: 4px;
-      @color: white;
-
-      .arrow-top, .arrow-bottom, .arrow-left, .arrow-right {
-        content: '';
-        width: 0;
-        height: 0;
-        border-style: solid;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-      }
-      .arrow-top {
-        border-width: 0 @base @height @base;
-        border-color: transparent transparent @color transparent;
-        margin-left: @base * -1;
-        margin-top: @height * -2 + @moveDelta;
-      }
-      .arrow-bottom {
-          border-width: @height @base 0px @base;
-          border-color: @color transparent transparent transparent;
-          margin-left: @base * -1;
-          margin-top: @height - @moveDelta;
-      }
-      .arrow-left {
-          border-width: @base @height @base 0;
-          border-color: transparent @color transparent;
-          margin-left: @height * -2 + @moveDelta;
-          margin-top: @base * -1;
-      }
-      .arrow-right {
-          border-width: @base 0px @base @height;
-          border-color: transparent transparent transparent @color;
-          margin-left: @height - @moveDelta;
-          margin-top: @base * -1;
-      }
-    }
-  }
-
-  button {
-    width: 100%;
-    color: white;
-    text-transform: lowercase;
-    font-variant: small-caps;
-    font-size: 120%;
-    font-weight: bold;
-    border: 0;
-    letter-spacing: 1px;
-    line-height: 1.1em;
-    margin-bottom: 0.5em;
-    background-color: @dark-bg;
-    border-radius: 2px;
-
-    &.zoom {
-      float: left;
-      width: 50%;
-    }
-
-    &.active {
-      background-color: @dark-active-bg;
-      border-bottom-left-radius: 0;
-      border-bottom-right-radius: 0;
-    }
-
-    &:hover {
-      background-color: @dark-active-bg;
     }
   }
 

@@ -28,13 +28,8 @@ define([
         },
 
         render() {
-            const { active, onClick, tool, rightOffset } = this.props;
-            const { props: toolProps, icon, label, buttonClass, identifier, componentPath } = tool;
-
-            if (!icon && !label) {
-                console.warn(tool.identifier + 'option supplied. One of "icon" or "label" is required');
-                return null;
-            }
+            const { active, onClick, tool } = this.props;
+            const { props: toolProps, icon, label, buttonClass, identifier, componentPath, placementHint } = tool;
 
             return (
                 <li
@@ -42,6 +37,47 @@ define([
                     onClick={this.onOptionClick}
                     ref={(ref) => { this.option = ref }}
                 >
+                  {componentPath
+                      ? placementHint && placementHint === 'popover'
+                          ? this.renderPopoverOption()
+                          : this.renderOption()
+                      : this.renderButton()}
+                </li>
+            );
+        },
+
+        renderButton() {
+            const { active, tool } = this.props;
+            const { props: toolProps, icon, label, buttonClass, identifier, componentPath } = tool;
+
+            return (
+                <div className={classNames('button', buttonClass)}>
+                    { icon ?
+                        <div className="option-icon" style={{backgroundImage: `url(${icon})`}}></div>
+                    : null}
+                    <span>{label}</span>
+                </div>
+            )
+        },
+
+        renderOption() {
+            const { props: toolProps, identifier, componentPath } = this.props.tool;
+
+            return (
+                <Attacher
+                    key={identifier}
+                    componentPath={componentPath}
+                    {...(toolProps || {})}
+                />
+            )
+        },
+
+        renderPopoverOption() {
+            const { active, tool } = this.props;
+            const { props: toolProps, icon, label, buttonClass, identifier, componentPath } = tool;
+
+            return (
+                <div>
                     <div className={classNames('button', buttonClass)}>
                         { icon ?
                             <div className="option-icon" style={{backgroundImage: `url(${icon})`}}></div>
@@ -53,7 +89,7 @@ define([
                         className="option-container"
                         ref={(ref) => { this.popover = ref }}
                     >
-                       {active && componentPath ? <Attacher
+                       {active ? <Attacher
                             key={identifier}
                             componentPath={componentPath}
                             afterAttach={this.positionPopover}
@@ -61,8 +97,8 @@ define([
                        /> : null}
                     </div>
                     <div className="arrow top"></div>
-                </li>
-            );
+                </div>
+            )
         },
 
         onOptionClick(event) {

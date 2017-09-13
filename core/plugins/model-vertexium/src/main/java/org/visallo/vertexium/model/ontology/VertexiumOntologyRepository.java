@@ -12,6 +12,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.semanticweb.owlapi.io.OWLOntologyDocumentSource;
 import org.semanticweb.owlapi.io.ReaderDocumentSource;
 import org.semanticweb.owlapi.model.*;
@@ -108,10 +109,10 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
         defineRequiredProperty(OntologyProperties.GLYPH_ICON, byte[].class, TextIndexHint.NONE);
         defineRequiredProperty(OntologyProperties.MAP_GLYPH_ICON, byte[].class, TextIndexHint.NONE);
         defineRequiredProperty(OntologyProperties.DATA_TYPE, String.class, EnumSet.of(TextIndexHint.EXACT_MATCH));
-        defineRequiredProperty(OntologyProperties.USER_VISIBLE, Boolean.TYPE, null);
-        defineRequiredProperty(OntologyProperties.SEARCHABLE, Boolean.TYPE, null);
-        defineRequiredProperty(OntologyProperties.SORTABLE, Boolean.TYPE, null);
-        defineRequiredProperty(OntologyProperties.ADDABLE, Boolean.TYPE, null);
+        defineRequiredProperty(OntologyProperties.USER_VISIBLE, Boolean.TYPE, TextIndexHint.NONE);
+        defineRequiredProperty(OntologyProperties.SEARCHABLE, Boolean.TYPE, TextIndexHint.NONE);
+        defineRequiredProperty(OntologyProperties.SORTABLE, Boolean.TYPE, TextIndexHint.NONE);
+        defineRequiredProperty(OntologyProperties.ADDABLE, Boolean.TYPE, TextIndexHint.NONE);
         defineRequiredProperty(OntologyProperties.ONTOLOGY_FILE, byte[].class, TextIndexHint.NONE);
         defineRequiredProperty(OntologyProperties.ONTOLOGY_FILE_MD5, String.class, TextIndexHint.NONE);
         defineRequiredProperty(OntologyProperties.DEPENDENT_PROPERTY_ORDER_PROPERTY_NAME, Integer.class, TextIndexHint.NONE);
@@ -124,6 +125,18 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
                 builder.textIndexHint(textIndexHint);
             }
             builder.define();
+        } else {
+            PropertyDefinition propertyDefinition = graph.getPropertyDefinition(property.getPropertyName());
+            if (propertyDefinition.getDataType() != dataType) {
+                throw new VisalloException("Ontology property type mismatch for property " + property.getPropertyName() + "! " +
+                        "Expected " + dataType.getName() + " but found " + propertyDefinition.getDataType().getName());
+            }
+
+            Set definedTextHints = propertyDefinition.getTextIndexHints() == null ? Collections.EMPTY_SET : propertyDefinition.getTextIndexHints();
+            if (!definedTextHints.equals(textIndexHint)) {
+                throw new VisalloException("Ontology property text index hints mismatch for property " + property.getPropertyName() + "! " +
+                        "Expected " + textIndexHint + " but found " + definedTextHints);
+            }
         }
     }
 
@@ -176,9 +189,15 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
         String md5 = DigestUtils.md5Hex(data);
         StreamingPropertyValue value = new StreamingPropertyValue(new ByteArrayInputStream(data), byte[].class);
         value.searchIndex(false);
-        Metadata metadata = new Metadata();
         Vertex rootConceptVertex = ((VertexiumConcept) getRootConcept(PUBLIC)).getVertex();
-        metadata.add("index", Iterables.size(OntologyProperties.ONTOLOGY_FILE.getProperties(rootConceptVertex)), VISIBILITY.getVisibility());
+        Property existingProperty = OntologyProperties.ONTOLOGY_FILE.getProperty(rootConceptVertex, documentIRI.toString());
+        Metadata metadata;
+        if (existingProperty == null) {
+            metadata = new Metadata();
+            metadata.add("index", Iterables.size(OntologyProperties.ONTOLOGY_FILE.getProperties(rootConceptVertex)), VISIBILITY.getVisibility());
+        } else {
+            metadata = existingProperty.getMetadata();
+        }
         OntologyProperties.ONTOLOGY_FILE.addPropertyValue(rootConceptVertex, documentIRI.toString(), value, metadata, VISIBILITY.getVisibility(), authorizations);
         OntologyProperties.ONTOLOGY_FILE_MD5.addPropertyValue(rootConceptVertex, documentIRI.toString(), md5, metadata, VISIBILITY.getVisibility(), authorizations);
         graph.flush();
@@ -206,7 +225,7 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
         for (Property ontologyFile : ontologyFiles) {
             IRI ontologyFileIRI = IRI.create(ontologyFile.getKey());
             if (excludedIRI != null && excludedIRI.equals(ontologyFileIRI)) {
-                continue;
+                return loadedOntologies;
             }
             try (InputStream visalloBaseOntologyIn = ((StreamingPropertyValue) ontologyFile.getValue()).getInputStream()) {
                 Reader visalloBaseOntologyReader = new InputStreamReader(visalloBaseOntologyIn);
@@ -737,15 +756,28 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
             String workspaceId
     ) {
         Relationship relationship = getRelationshipByIRI(relationshipIRI, workspaceId);
-        if (relationship != null) {
-            if (isDeclaredInOntology) {
-                deleteChangeableProperties(relationship, getAuthorizations(workspaceId));
-            }
-            return relationship;
-        }
-
         try (GraphUpdateContext ctx = graphRepository.beginGraphUpdate(getPriority(user), user, getAuthorizations(workspaceId))) {
             ctx.setPushOnQueue(false);
+            if (relationship != null) {
+                if (isDeclaredInOntology) {
+                    deleteChangeableProperties(relationship, getAuthorizations(workspaceId));
+                }
+
+                Vertex relationshipVertex = ((VertexiumRelationship) relationship).getVertex();
+                for (Concept domainConcept : domainConcepts) {
+                    if (!relationship.getDomainConceptIRIs().contains(domainConcept.getIRI())) {
+                        findOrAddEdge(ctx, ((VertexiumConcept) domainConcept).getVertex(), relationshipVertex, LabelName.HAS_EDGE.toString());
+                    }
+                }
+                for (Concept rangeConcept : rangeConcepts) {
+                    if (!relationship.getRangeConceptIRIs().contains(rangeConcept.getIRI())) {
+                        findOrAddEdge(ctx, relationshipVertex, ((VertexiumConcept) rangeConcept).getVertex(), LabelName.HAS_EDGE.toString());
+                    }
+                }
+
+                return relationship;
+            }
+
 
             Visibility visibility = VISIBILITY.getVisibility();
             VisibilityJson visibilityJson = new VisibilityJson(visibility.getVisibilityString());

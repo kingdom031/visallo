@@ -11,27 +11,37 @@ input { .box-shadow(none); }
   top: 0;
   z-index: @graph-zIndex;
 
-  @light-bg: #eee;
-  @light-active-bg: #ddd;
-  @dark-bg: #929292;
-  @dark-active-bg: #575757;
+  @bg: #eee;
+  @active-bg: #ddd;
+  @border-color: #bbb;
 
   .controls-list {
     display: flex;
-    background: @light-bg;
+    background: @bg;
     .box-shadow(0 0 2px rgba(0,0,0,0.3));
-    margin-bottom: 0.5em;
-    padding: 2px;
 
     .extensions {
       list-style-type: none;
       display: flex;
       margin: 0;
       padding-right: 0.5em;
-      border-right: 1px solid @light-active-bg;
+      border-right: 1px solid @active-bg;
 
       .controls-option {
         margin-right: 0.25em;
+        padding: 2px;
+        border: 1px solid transparent;
+
+        &:hover {
+          background: @active-bg;
+          border: 1px solid @border-color;
+        }
+        &.active {
+          background-color: @active-bg;
+          .arrow {
+            display: block;
+          }
+        }
 
         .button {
           .option-icon {
@@ -56,83 +66,76 @@ input { .box-shadow(none); }
             }
           }
         }
-
-        &.active {
-          .arrow {
-            display: block;
-          }
-          .button {
-            background-color: @light-active-bg;
-          }
-        }
       }
     }
 
-  .controls-menu {
-    padding: 0 0.25em;
-
-    button {
-      position: relative;
-      margin: 0;
-      background-image: url(../img/glyphicons/glyphicons_157_show_lines@2x.png);
-      background-size: 60%;
-      background-repeat: no-repeat;
-      background-position: center;
-      background-color: @light-bg;
-      font-size: 0;
-      width: 23px;
-      height: 23px;
+    .controls-menu {
+      padding: 0 0.25em;
       border: 1px solid transparent;
 
       &.active {
-        background-color: @light-active-bg;
+        background-color: @active-bg;
       }
+
       &:hover {
-        background-color: @light-active-bg;
-        border: 1px solid #bbb;
-      }
-    }
-
-    .option-container {
-      white-space: nowrap;
-      right: @padding;
-
-      input {
-        vertical-align: middle;
-        margin: 0 0.25em;
+        background-color: @active-bg;
+        border: 1px solid @border-color;
       }
 
-      ul {
-        list-style: none;
+      button {
+        position: relative;
         margin: 0;
-        padding: 0;
+        background-color: transparent;
+        background-image: url(../img/glyphicons/glyphicons_157_show_lines@2x.png);
+        background-size: 60%;
+        background-repeat: no-repeat;
+        background-position: center;
+        font-size: 0;
+        width: 23px;
+        height: 100%;
+        border: 1px solid transparent;
+      }
 
-        li {
-          padding: 0.3em 0.5em;
+      .option-container {
+        white-space: nowrap;
+        right: @padding / 2;
+
+        input {
+          vertical-align: middle;
+          margin: 0 0.25em;
+        }
+
+        ul {
+          list-style: none;
           margin: 0;
-          label {
-            font-size: inherit;
+          padding: 0;
+
+          li {
+            padding: 0.3em 0.5em;
             margin: 0;
-          }
-          .group label {
-            display: inline;
-            input {
-              margin-left: 0.5em;
-              margin-right: 0.1em;
+            label {
+              font-size: inherit;
+              margin: 0;
             }
-          }
-          .subtitle {
-            font-style: italic;
-            color: #ccc;
+            .group label {
+              display: inline;
+              input {
+                margin-left: 0.5em;
+                margin-right: 0.1em;
+              }
+            }
+            .subtitle {
+              font-style: italic;
+              color: #ccc;
+            }
           }
         }
       }
     }
-  }
 
     .option-container {
       position: absolute;
-      top: 35px;
+      top: 30px;
       padding: 0.5em;
       padding-bottom: 0.1em;
       box-shadow: 0 5px 10px rgba(0,0,0,0.2);
@@ -151,28 +154,15 @@ input { .box-shadow(none); }
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      background: @light-bg;
-      border: 1px solid transparent;
       border-radius: 2px;
       cursor: pointer;
       user-select: none;
-
-      &:hover {
-        background: @light-active-bg;
-        border: 1px solid #bbb;
-      }
-    }
-
-    &.active button {
-      background: @light-active-bg;
-      border-bottom-left-radius: 0;
-      border-bottom-right-radius: 0;
     }
 
     .arrow {
       display: none;
       position: absolute;
-      top: 25px;
+      top: 20px;
       height: 0;
       width: 0;
       border: 5px solid transparent;
@@ -180,7 +170,7 @@ input { .box-shadow(none); }
     }
   }
 
-  .button, button {
+  .controls-option, button {
     transition: background-color ease-in-out 0.1s;
   }
 }

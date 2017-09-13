@@ -16,6 +16,7 @@ define([
         POPOVER: 'popover'
     };
     const MENU_IDENTIFIER = 'menu';
+    const HOVER_OPEN_DELAY = 600;
 
     const ProductControls = createReactClass({
 
@@ -43,16 +44,24 @@ define([
 
         getInitialState() {
             return {
-                activeOption: null
+                activeOption: null,
+                stayOpen: false
             }
         },
 
         componentDidMount() {
             $(document).on('keydown.org-visallo-graph-product-controls', (event) => {
                 if (event.which === 27) { //esc
-                    this.setState({ activeOption: null });
+                    this.setState({ activeOption: null, stayOpen: false });
                 }
             });
+        },
+
+        componentDidUpdate(prevState, prevProps) {
+            if (this.state.stayOpen && this.openOptionTimeout) {
+                clearTimeout(this.openOptionTimeout);
+                this.openOptionTimeout = null;
+            }
         },
 
         componentWillUnmount() {
@@ -91,7 +100,9 @@ define([
                                         tool={tool}
                                         active={activeOption === tool.identifier}
                                         key={tool.identifier}
-                                        onClick={() => {this.onItemClick(tool.identifier) }}
+                                        onClick={this.onOptionClick}
+                                        onOptionMouseEnter={this.onOptionMouseEnter}
+                                        onOptionMouseLeave={this.onOptionMouseLeave}
                                         rightOffset={rightOffset}
                                     />
                                 ))}
@@ -101,7 +112,10 @@ define([
                             <ProductControlsMenu
                                 options={menuOptions}
                                 active={activeOption === MENU_IDENTIFIER}
-                                onToggle={() => { this.onItemClick(MENU_IDENTIFIER) }}
+                                identifier={MENU_IDENTIFIER}
+                                onToggle={this.onOptionClick}
+                                onOptionMouseEnter={this.onOptionMouseEnter}
+                                onOptionMouseLeave={this.onOptionMouseLeave}
                             />
                         : null}
                     </div>
@@ -109,14 +123,47 @@ define([
             );
         },
 
-        onItemClick(identifier) {
-            if (identifier) {
-                const activeOption = this.state.activeOption;
+        onOptionClick(identifier) {
+            const { activeOption, stayOpen } = this.state;
 
-                this.setState({
-                    activeOption: activeOption === identifier ? null : identifier
-                });
+            if (activeOption) {
+                if (activeOption === identifier && !stayOpen) {
+                    this.setState({ stayOpen: true });
+                } else if (activeOption === identifier) {
+                    this.setActiveOption();
+                } else {
+                    this.setActiveOption(activeOption, true);
+                }
+            } else if (identifier) {
+                this.setActiveOption(identifier, true);
+            } else {
+                this.setActiveOption();
             }
+        },
+
+        onOptionMouseEnter(identifier) {
+            if (!this.state.stayOpen) {
+                this.openOptionTimeout = setTimeout(() => { this.setActiveOption(identifier) }, HOVER_OPEN_DELAY);
+            }
+        },
+
+        onOptionMouseLeave(identifier) {
+            if (!this.state.stayOpen) {
+                const { activeOption, stayOpen } = this.state;
+
+                if (this.openOptionTimeout) {
+                    clearTimeout(this.openOptionTimeout);
+                    this.openOptionTimeout = null;
+                }
+
+                if (activeOption && !stayOpen) {
+                    this.setActiveOption();
+                }
+            }
+        },
+
+        setActiveOption(activeOption = null, stayOpen = false) {
+            this.setState({ activeOption, stayOpen });
         },
 
         getDefaultOptions() {

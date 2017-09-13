@@ -5,16 +5,19 @@ define([
 ], function(createReactClass, PropTypes, Attacher) {
     'use strict';
 
-    const ProductControlsMenu = ({ active, options, onToggle }) => {
+    const ProductControlsMenu = ({ active, identifier, options, onToggle, onOptionMouseEnter, onOptionMouseLeave }) => {
         if (_.isEmpty(options)) {
             return null;
         }
 
         return (
-            <div className="controls-menu">
+            <div className="controls-menu"
+                onMouseEnter={() => { onOptionMouseEnter(identifier) }}
+                onMouseLeave={() => { onOptionMouseLeave(identifier) }}
+            >
                 <button
                     className={active ? 'active' : ''}
-                    onClick={onToggle}
+                    onClick={() => { onToggle(identifier) }}
                     title={i18n('controls.options.toggle')}>Option</button>
                 <div style={{display: (active ? 'block' : 'none')}} className="option-container">
                     <ul>{

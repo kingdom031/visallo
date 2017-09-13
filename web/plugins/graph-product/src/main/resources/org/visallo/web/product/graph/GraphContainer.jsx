@@ -39,7 +39,7 @@ define([
      * * `menu` inside the hamburger menu list
      * * `popover` as a button that will expand a popover where the component is rendered. If specified one of `icon` or `label` is required.
      * * `button` as an inline button component
-     * @param {string} [buttonClass] Css class to add to the button element
+     * @param {string} [buttonClass] Css class to add to the button element when placed as `button` or `popover`
      * @param {string} [icon] Path to the icon to render when displayed as a `popover`
      * @param {string} [label] Label text to render when displayed as a `popover`
      */

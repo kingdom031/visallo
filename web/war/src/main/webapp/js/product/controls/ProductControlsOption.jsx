@@ -28,7 +28,7 @@ define([
         },
 
         render() {
-            const { active, onClick, tool } = this.props;
+            const { active, tool, onOptionMouseEnter, onOptionMouseLeave } = this.props;
             const { props: toolProps, icon, label, buttonClass, identifier, componentPath, placementHint } = tool;
 
             return (
@@ -36,6 +36,8 @@ define([
                     className={classNames('controls-option', { active })}
                     onClick={this.onOptionClick}
                     ref={(ref) => { this.option = ref }}
+                    onMouseEnter={(event) => { onOptionMouseEnter(identifier) }}
+                    onMouseLeave={(event) => { onOptionMouseLeave(identifier) }}
                 >
                   {componentPath
                       ? placementHint && placementHint === 'popover'
@@ -103,11 +105,11 @@ define([
 
         onOptionClick(event) {
             if (!$(event.target).closest('.option-container').length) {
-                const toolProps = this.props.tool.props || {};
+                const { props: toolProps = {}, identifier } = this.props.tool;
                 if (_.isFunction(toolProps.handler)) {
                     toolProps.handler();
                 } else {
-                    this.props.onClick();
+                    this.props.onClick(identifier);
                 }
             }
         },

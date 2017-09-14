@@ -11,6 +11,7 @@ var VisalloAmdExternals = [
     'data/web-worker/store/product/actions',
     'data/web-worker/store/user/actions-impl',
     'data/web-worker/store/user/actions',
+    'data/web-worker/store/user/selectors',
     'data/web-worker/store/product/selectors',
     'data/web-worker/store/selection/actions',
     'data/web-worker/store/user/actions-impl',
@@ -29,6 +30,7 @@ var VisalloAmdExternals = [
     'util/vertex/formatters',
     'util/retina',
     'util/dnd',
+    'util/parsers',
     'util/withContextMenu',
     'util/withDataRequest',
     'util/withTeardown',
@@ -74,6 +76,13 @@ var baseConfig = {
             exclude: /(node_modules)/,
             use: [
                 { loader: 'babel-loader' }
+            ]
+        },
+        {
+            test: /\.jsx?$/,
+            exclude: /(node_modules|__mocks__|__tests__|dist)/,
+            use: [
+                { loader: 'eslint-loader' }
             ]
         }
     ]

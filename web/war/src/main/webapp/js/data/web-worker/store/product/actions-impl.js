@@ -2,10 +2,11 @@ define([
     '../actions',
     '../../util/ajax',
     '../element/actions-impl',
+    '../element/selectors',
     '../selection/actions-impl',
     './selectors',
     'configuration/plugins/registry'
-], function(actions, ajax, elementActions, selectionActions, selectors, registry) {
+], function(actions, ajax, elementActions, elementSelectors, selectionActions, selectors, registry) {
     actions.protectFromMain();
 
     const api = {
@@ -32,10 +33,11 @@ define([
                     dispatch(api.update(product));
 
                     const { vertices, edges } = product.extendedData;
-                    const vertexIds = Object.keys(vertices);
                     const edgeIds = Object.keys(edges);
+                    const vertexIds = Object.keys(vertices);
+                    const includeAncillary = _.any(vertices, ({ancillary}) => ancillary === true)
 
-                    dispatch(elementActions.get({ workspaceId, vertexIds, edgeIds }));
+                    dispatch(elementActions.get({ workspaceId, vertexIds, edgeIds, includeAncillary }));
                 })
             }
         },

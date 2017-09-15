@@ -502,8 +502,6 @@ public class GraphWorkProductService extends WorkProductServiceHasElementsBase<G
             UpdateProductEdgeOptions updateOptions,
             Visibility visibility
     ) {
-        super.updateProductEdge(elemCtx, updateOptions, visibility);
-
         if (updateOptions instanceof GraphUpdateProductEdgeOptions) {
             GraphUpdateProductEdgeOptions update = (GraphUpdateProductEdgeOptions) updateOptions;
             GraphPosition position = update.getPos();
@@ -526,6 +524,8 @@ public class GraphWorkProductService extends WorkProductServiceHasElementsBase<G
 
     @Override
     public void populateProductVertexWithWorkspaceEdge(Edge propertyVertexEdge, WorkProductVertex vertex2) {
+        super.populateProductVertexWithWorkspaceEdge(propertyVertexEdge, vertex2);
+
         // FIXME: generics
         GraphWorkProductVertex vertex = (GraphWorkProductVertex) vertex2;
         GraphPosition position = ENTITY_POSITION.getPropertyValue(propertyVertexEdge);

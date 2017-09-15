@@ -39,9 +39,6 @@ public class MapWorkProductService extends WorkProductServiceHasElementsBase<Wor
     protected void updateProductEdge(ElementUpdateContext<Edge> elemCtx, UpdateProductEdgeOptions update, Visibility visibility) {
     }
 
-    @Override
-    public void populateProductVertexWithWorkspaceEdge(Edge propertyVertexEdge, WorkProductVertex vertex) {
-    }
 
     public void updateVertices(
             GraphUpdateContext ctx,

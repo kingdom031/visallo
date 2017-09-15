@@ -1192,6 +1192,7 @@ public class VertexiumWorkspaceRepository extends WorkspaceRepository {
         Authorizations authorizations = getAuthorizationRepository().getGraphAuthorizations(
                 user,
                 VISIBILITY_STRING,
+                VISIBILITY_PRODUCT_STRING,
                 workspaceId
         );
         Vertex productVertex = getGraph().getVertex(productId, authorizations);
@@ -1236,14 +1237,12 @@ public class VertexiumWorkspaceRepository extends WorkspaceRepository {
             ctx.setPushOnQueue(false);
             vertex = ctx.getOrCreateVertexAndUpdate(vertexId, productVisibility, updateFn).get();
 
-            UpdateProductEdgeOptions options = new UpdateProductEdgeOptions();
-            options.setAncillary(true);
             // FIXME ? why cast needed
             edge = (Edge) elementsService.addOrUpdateProductEdgeToAncillaryEntity(
                     ctx,
                     productVertex,
                     vertex.getId(),
-                    options,
+                    new UpdateProductEdgeOptions(),
                     workspaceVisibility
             ).get();
 

@@ -34,7 +34,10 @@ define([
     const generateCompoundEdgeId = edge => edge.outVertexId + edge.inVertexId + edge.label;
     const isGhost = cyElement => cyElement && cyElement._private && cyElement._private.data && cyElement._private.data.animateTo;
     const isValidElement = cyElement => cyElement && cyElement.is('.c,.v,.e,.partial') && !isGhost(cyElement);
-    const isValidNode = cyElement => cyElement && cyElement.is('node.c,node.v,node.partial') && !isGhost(cyElement);
+    const isValidNode = cyElement => cyElement && cyElement.is('node.c,node.v,node.partial,node.ancillary') && !isGhost(cyElement);
+    const canUpdatePosition = isValidNode;
+    const canSelect = isValidElement;
+    const canRemove = isValidElement;
     const edgeDisplay = (label, ontologyRelationships, edges) => {
         const display = label in ontologyRelationships ? ontologyRelationships[label].displayName : '';
         const showNum = edges.length > 1;
@@ -744,7 +747,7 @@ define([
                 } else if (!shiftKey && cy === target) {
                     this.coalesceSelection('clear');
                     this.props.onClearSelection();
-                } else if (!shiftKey && !metaKey && isValidElement(target)) {
+                } else if (!shiftKey && !metaKey && canSelect(target)) {
                     this.coalesceSelection('clear');
                     this.coalesceSelection('add', getCyItemTypeAsString(target), target);
                 }
@@ -776,19 +779,19 @@ define([
         },
 
         onRemove({ target }) {
-            if (isValidElement(target)) {
+            if (canRemove(target)) {
                 this.coalesceSelection('remove', getCyItemTypeAsString(target), target);
             }
         },
 
         onSelect({ target }) {
-            if (isValidElement(target)) {
+            if (canSelect(target)) {
                 this.coalesceSelection('add', getCyItemTypeAsString(target), target);
             }
         },
 
         onUnselect({ target }) {
-            if (isValidElement(target)) {
+            if (canSelect(target)) {
                 this.coalesceSelection('remove', getCyItemTypeAsString(target), target);
             }
         },
@@ -820,7 +823,7 @@ define([
         },
 
         onPosition({ target }) {
-            if (isValidNode(target)) {
+            if (canUpdatePosition(target)) {
                 var id = target.id();
                 this.cyNodeIdsWithPositionChanges[id] = target;
             }
@@ -877,28 +880,62 @@ define([
             const filterByRoot = (items) => _.values(_.pick(items, rootNode.children));
 
             const cyNodeConfig = (node) => {
-                const { id, type, pos, title } = node;
+                // FIXME
+                // change ancillary to string with type so we can more
+                // easily filter extensions
+
+                const { id, type, pos, title, ancillary } = node;
                 let selected, classes, data;
 
-                if (type === 'vertex') {
-                   selected = id in verticesSelectedById;
-                   classes = mapVertexToClasses(id, vertices, focusing, registry['org.visallo.graph.node.class']);
-                   data = mapVertexToData(id, vertices, registry['org.visallo.graph.node.transformer'], hovering);
+                if (ancillary) {
+                    selected = false;
+                    classes = 'ancillary';
+                    data = { id };
+                    let extensionHandled = false;
+                    registry['org.visallo.graph.ancillary'].forEach(({
+                        canHandle, canDisplayBeforeVertex, data: dataFn, classes: classFn
+                    }) => {
+                        const vertexReady = id in vertices;
+                        if (canHandle(node) && (vertexReady || canDisplayBeforeVertex(node))) {
+                            extensionHandled = true;
+                            if (dataFn) {
+                                data = { ...dataFn(node, vertices[id]), id };
+                            }
+                            if (classFn) {
+                                const classList = classFn(node, vertices[id])
+                                if (classList.length) {
+                                    classes += ' ' + classList.join(' ')
+                                }
+                            }
+                        }
+                    })
 
-                   if (data) {
-                       renderedNodeIds[id] = true;
-                   }
+                    if (!extensionHandled) {
+                        classes += ' unhandled';
+                    }
+
+                    if (data) {
+                        renderedNodeIds[id] = true;
+                    }
+                } else if (type === 'vertex') {
+                    selected = id in verticesSelectedById;
+                    classes = mapVertexToClasses(id, vertices, focusing, registry['org.visallo.graph.node.class']);
+                    data = mapVertexToData(id, vertices, registry['org.visallo.graph.node.transformer'], hovering);
+
+                    if (data) {
+                        renderedNodeIds[id] = true;
+                    }
                 } else {
-                   const vertexIds = getVertexIdsFromCollapsedNode(collapsedNodes, id);
-                   selected = vertexIds.some(id => id in verticesSelectedById)
-                   classes = mapCollapsedNodeToClasses(id, collapsedNodes, focusing, vertexIds, registry['org.visallo.graph.collapsed.class']);
-                   const nodeTitle = title || generateCollapsedNodeTitle(node, vertices, productVertices, collapsedNodes);
-                   data = {
-                       ...node,
-                       vertexIds,
-                       truncatedTitle: F.string.truncate(nodeTitle, 3),
-                       imageSrc: this.state.collapsedImageDataUris[id] && this.state.collapsedImageDataUris[id].imageDataUri || 'img/loading-large@2x.png'
-                   };
+                    const vertexIds = getVertexIdsFromCollapsedNode(collapsedNodes, id);
+                    selected = vertexIds.some(id => id in verticesSelectedById)
+                    classes = mapCollapsedNodeToClasses(id, collapsedNodes, focusing, vertexIds, registry['org.visallo.graph.collapsed.class']);
+                    const nodeTitle = title || generateCollapsedNodeTitle(node, vertices, productVertices, collapsedNodes);
+                    data = {
+                        ...node,
+                        vertexIds,
+                        truncatedTitle: F.string.truncate(nodeTitle, 3),
+                        imageSrc: this.state.collapsedImageDataUris[id] && this.state.collapsedImageDataUris[id].imageDataUri || 'img/loading-large@2x.png'
+                    };
                 }
 
                 return {
@@ -1597,6 +1634,7 @@ define([
         'org.visallo.graph.node.class',
         'org.visallo.graph.node.decoration',
         'org.visallo.graph.node.transformer',
+        'org.visallo.graph.ancillary',
         'org.visallo.graph.collapsed.class',
         'org.visallo.graph.options',
         'org.visallo.graph.selection',

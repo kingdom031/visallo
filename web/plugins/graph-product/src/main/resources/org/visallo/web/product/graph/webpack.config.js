@@ -66,14 +66,14 @@ var baseConfig = {
     rules: [
         {
             test: /\.ejs$/,
-            exclude: /(node_modules)/,
+            exclude: /(dist|node_modules)/,
             use: [
                 { loader: 'ejs-compiled-loader' }
             ]
         },
         {
             test: /\.jsx?$/,
-            exclude: /(node_modules)/,
+            exclude: /(dist|node_modules)/,
             use: [
                 { loader: 'babel-loader' }
             ]

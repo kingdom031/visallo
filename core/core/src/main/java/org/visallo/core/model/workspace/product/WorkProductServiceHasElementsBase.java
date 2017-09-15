@@ -124,12 +124,14 @@ public abstract class WorkProductServiceHasElementsBase<TVertex extends WorkProd
 
 
     public GraphUpdateContext.UpdateFuture<Edge> addOrUpdateProductEdgeToAncillaryEntity(GraphUpdateContext ctx, Vertex productVertex, String entityId, UpdateProductEdgeOptions options, Visibility visibility) {
+        if (options == null) options = new UpdateProductEdgeOptions();
         options.setAncillary(true);
 
         return addOrUpdateProductEdgeToEntity(ctx, productVertex, entityId, options, visibility);
     }
 
     public GraphUpdateContext.UpdateFuture<Edge> addOrUpdateProductEdgeToAncillaryEntity(GraphUpdateContext ctx, String edgeId, Vertex productVertex, String entityId, UpdateProductEdgeOptions options, Visibility visibility) {
+        if (options == null) options = new UpdateProductEdgeOptions();
         options.setAncillary(true);
 
         return addOrUpdateProductEdgeToEntity(ctx, edgeId, productVertex, entityId, options, visibility);
@@ -154,13 +156,23 @@ public abstract class WorkProductServiceHasElementsBase<TVertex extends WorkProd
                 entityId,
                 WorkspaceProperties.PRODUCT_TO_ENTITY_RELATIONSHIP_IRI,
                 visibility,
-                elemCtx -> updateProductEdge(elemCtx, options, visibility)
+                elemCtx -> {
+                   WorkspaceProperties.PRODUCT_TO_ENTITY_IS_ANCILLARY.updateProperty(elemCtx, options.isAncillary(), visibility);
+                   updateProductEdge(elemCtx, options, visibility);
+                }
         );
     }
 
     @Override
-    public TVertex populateProductVertexWithWorkspaceEdge(Edge propertyVertexEdge) {
-        TVertex vertex = createWorkProductVertex();
+    public void populateProductVertexWithWorkspaceEdge(Edge propertyVertexEdge, WorkProductVertex vertex) {
+        if (WorkspaceProperties.PRODUCT_TO_ENTITY_IS_ANCILLARY.getPropertyValue(propertyVertexEdge)) {
+            vertex.setAncillary(true);
+        }
+    }
+
+    @Override
+    public WorkProductVertex populateProductVertexWithWorkspaceEdge(Edge propertyVertexEdge) {
+        WorkProductVertex vertex = createWorkProductVertex();
         populateProductVertexWithWorkspaceEdge(propertyVertexEdge, vertex);
         return vertex;
     }
@@ -169,9 +181,7 @@ public abstract class WorkProductServiceHasElementsBase<TVertex extends WorkProd
             ElementUpdateContext<Edge> elemCtx,
             UpdateProductEdgeOptions update,
             Visibility visibility
-    ) {
-        WorkspaceProperties.PRODUCT_TO_ENTITY_IS_ANCILLARY.updateProperty(elemCtx, update.isAncillary(), visibility);
-    }
+    ) {}
 
     public static String getEdgeId(String productId, String vertexId) {
         return productId + "_hasVertex_" + vertexId;

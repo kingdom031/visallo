@@ -133,7 +133,7 @@ define([
             cy.on('tap mouseover mouseout', 'node.decoration', event => {
                 this.props.onDecorationEvent(event);
             });
-            cy.on('position grab free', 'node.v', ({ target }) => {
+            cy.on('position grab free', 'node.v,node.ancillary', ({ target }) => {
                 if (target.isChild()) {
                     this.updateDecorationPositions(target);
                 }
@@ -511,7 +511,7 @@ define([
         fit(nodes, options = {}) {
             const { animate = true } = options;
             const { cy } = this.state;
-            const cyNodes = nodes || cy.nodes('node.c,node.v,node.partial,.decoration');
+            const cyNodes = nodes || cy.nodes('node.c,node.v,node.partial,.ancillary,.decoration');
 
             if (cyNodes.size() === 0) {
                 cy.reset();

@@ -15,21 +15,23 @@ define([
     const ProductControlsOption = createReactClass({
 
         propTypes: {
-            tool: PropTypes.shape({
+            option: PropTypes.shape({
                 identifier: PropTypes.string.isRequired,
-                componentPath: PropTypes.string,
+                optionComponentPath: PropTypes.string,
                 icon: PropTypes.string,
                 label: PropTypes.string,
                 props: PropTypes.object
             }),
             active: PropTypes.bool,
             onClick: PropTypes.func,
+            onOptionMouseEnter: PropTypes.func,
+            onOptionMouseLeave: PropTypes.func,
             rightOffset: PropTypes.number
         },
 
         render() {
-            const { active, tool, onOptionMouseEnter, onOptionMouseLeave } = this.props;
-            const { props: toolProps, icon, label, buttonClass, identifier, componentPath, placementHint } = tool;
+            const { active, option, onOptionMouseEnter, onOptionMouseLeave } = this.props;
+            const { props: optionProps, icon, label, buttonClass, identifier, optionComponentPath, placementHint } = option;
 
             return (
                 <li
@@ -39,7 +41,7 @@ define([
                     onMouseEnter={(event) => { onOptionMouseEnter(identifier) }}
                     onMouseLeave={(event) => { onOptionMouseLeave(identifier) }}
                 >
-                  {componentPath
+                  {optionComponentPath
                       ? placementHint && placementHint === 'popover'
                           ? this.renderPopoverOption()
                           : this.renderOption()
@@ -49,8 +51,8 @@ define([
         },
 
         renderButton() {
-            const { active, tool } = this.props;
-            const { props: toolProps, icon, label, buttonClass, identifier, componentPath } = tool;
+            const { active, option } = this.props;
+            const { props: optionProps, icon, label, buttonClass, identifier, optionComponentPath } = option;
 
             return (
                 <div className={classNames('button', buttonClass)}>
@@ -63,20 +65,21 @@ define([
         },
 
         renderOption() {
-            const { props: toolProps, identifier, componentPath } = this.props.tool;
+            const { props: optionProps, identifier, optionComponentPath } = this.props.option;
 
             return (
                 <Attacher
                     key={identifier}
-                    componentPath={componentPath}
-                    {...(toolProps || {})}
+                    componentPath={optionComponentPath}
+                    {...optionProps}
                 />
             )
         },
 
         renderPopoverOption() {
-            const { active, tool } = this.props;
-            const { props: toolProps, icon, label, buttonClass, identifier, componentPath } = tool;
+            const { active, option } = this.props;
+            const { props: optionProps = {}, icon, label, buttonClass, identifier, optionComponentPath } = option;
+
 
             return (
                 <div>
@@ -93,9 +96,10 @@ define([
                     >
                        {active ? <Attacher
                             key={identifier}
-                            componentPath={componentPath}
+                            componentPath={optionComponentPath}
                             afterAttach={this.positionPopover}
-                            {...(toolProps || {})}
+                            {...optionProps}
+                            onResize={this.positionPopover}
                        /> : null}
                     </div>
                     <div className="arrow top"></div>
@@ -105,16 +109,20 @@ define([
 
         onOptionClick(event) {
             if (!$(event.target).closest('.option-container').length) {
-                const { props: toolProps = {}, identifier } = this.props.tool;
-                if (_.isFunction(toolProps.handler)) {
-                    toolProps.handler();
+                const { props: optionProps = {}, identifier } = this.props.option;
+                if (_.isFunction(optionProps.handler)) {
+                    optionProps.handler();
                 } else {
                     this.props.onClick(identifier);
                 }
             }
         },
 
-        positionPopover(attacher) {
+        /**
+         * Call `props.onResize` after your component changes size to update the popover's position
+         * @callback org.visallo.product.options~onResize
+         */
+        positionPopover() {
             const rightOffset = this.props.rightOffset;
             const { left: optionLeft, width: optionWidth, right: optionRight } = this.option.getBoundingClientRect();
             const { left, right, width } = this.popover.getBoundingClientRect();

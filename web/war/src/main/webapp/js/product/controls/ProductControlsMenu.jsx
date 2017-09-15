@@ -21,12 +21,12 @@ define([
                     title={i18n('controls.options.toggle')}>Option</button>
                 <div style={{display: (active ? 'block' : 'none')}} className="option-container">
                     <ul>{
-                        options.map(option => {
+                        options.map(({ identifier, optionComponentPath, props }) => {
                             return <Attacher
                                 nodeType="li"
-                                key={option.identifier}
-                                componentPath={option.componentPath}
-                                {...(option.props || {})} />
+                                key={identifier}
+                                componentPath={optionComponentPath}
+                                {...(props || {})} />
                         })
                     }</ul>
                 </div>
@@ -35,9 +35,12 @@ define([
     };
 
     ProductControlsMenu.propTypes = {
+        identifier: PropTypes.string.isRequired,
         active: PropTypes.bool,
         options: PropTypes.array,
-        onToggle: PropTypes.func
+        onToggle: PropTypes.func,
+        onOptionMouseEnter: PropTypes.func,
+        onOptionMouseLeave: PropTypes.func
     };
 
     return ProductControlsMenu;

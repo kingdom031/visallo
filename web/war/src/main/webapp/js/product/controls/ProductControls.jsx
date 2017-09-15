@@ -1,14 +1,42 @@
 define([
     'create-react-class',
     'prop-types',
+    'configuration/plugins/registry',
+    'components/RegistryInjectorHOC',
     './ProductControlsOption',
     './ProductControlsMenu'
 ], function(
     createReactClass,
     PropTypes,
+    registry,
+    RegistryInjectorHOC,
     ProductControlsOption,
     ProductControlsMenu) {
     'use strict';
+
+    /**
+     * Plugin to add custom options components (Flight or React) which display in toolbar at the top right of a product.
+     *
+     * @param {string} identifier Unique id for this option item
+     * @param {string} optionComponentPath Path to {@link org.visallo.product.options~Component} to render
+     * @param {func} canHandle Given `product` should this option be placed
+     * @param {string} [placementHint=menu] How this option should be displayed in the toolbar
+     * * `menu` inside the hamburger menu list
+     * * `popover` as a button that will expand a popover where the component is rendered.
+     *   If specified one of `icon` or `label` is required. Also passed {@link org.visallo.product.options.popover~onResize}
+     * * `button` as an inline button component
+     * @param {string} [buttonClass] Css class to add to the button element when placed as `button` or `popover`
+     * @param {string} [icon] Path to the icon to render when displayed as a `popover`
+     * @param {string} [label] Label text to render when displayed as a `popover`
+     */
+    registry.documentExtensionPoint('org.visallo.product.options',
+        'Add components to the product options toolbar',
+        function(e) {
+            return ('identifier' in e) && ('canHandle' in e && _.isFunction(e.canHandle))
+                && (['optionComponentPath', 'icon', 'label'].some(key => key in e));
+        },
+        'http://docs.visallo.org/extension-points/front-end/productOptions'
+    );
 
     const placementHint = {
         MENU: 'menu',
@@ -21,15 +49,12 @@ define([
     const ProductControls = createReactClass({
 
         propTypes: {
-            tools: PropTypes.arrayOf(PropTypes.shape({
-                identifier: PropTypes.string.isRequired,
-                componentPath: PropTypes.string.isRequired,
-                button: PropTypes.shape({
-                    icon: PropTypes.string,
-                    label: PropTypes.string
-                }),
-                props: PropTypes.object
-            })),
+            product: PropTypes.shape({
+                kind: PropTypes.string.isRequired
+            }).isRequired,
+            registry: PropTypes.object.isRequired,
+            injectedProductProps: PropTypes.object,
+            showNavigationControls: PropTypes.bool,
             onFit: PropTypes.func,
             onZoom: PropTypes.func,
             rightOffset: PropTypes.number
@@ -37,8 +62,9 @@ define([
 
         getDefaultProps() {
             return {
-                tools: [],
-                rightOffset: 0
+                rightOffset: 0,
+                showNavigationControls: false,
+                injectedProductProps: {}
             }
         },
 
@@ -70,36 +96,44 @@ define([
 
         render() {
             const { activeOption } = this.state;
-            const { onFit, onZoom, tools, rightOffset } = this.props;
+            const { onFit, onZoom, rightOffset, registry, injectedProductProps, product } = this.props;
             const menuOptions = [], listOptions = [];
-            const groupByPlacement = (tool) => {
-               const { placementHint, icon, label, componentPath } = tool;
+            const groupByPlacement = (option) => {
+               const { placementHint, icon, label } = option;
 
                if (placementHint) {
                    if (placementHint === placementHint.MENU) {
-                       menuOptions.push(tool);
+                       menuOptions.push(option);
                    } else {
-                       listOptions.push(tool);
+                       listOptions.push(option);
                    }
                } else if (icon || label) {
-                   listOptions.push(tool);
+                   listOptions.push(option);
                } else {
-                   menuOptions.push(tool);
+                   menuOptions.push(option);
                }
             };
+            const options = [
+                ...registry['org.visallo.product.options'],
+                ...this.getDefaultOptions(),
+                ...this.mapDeprecatedOptions()
+            ];
 
-            tools.concat(this.getDefaultOptions()).forEach(groupByPlacement);
+            options
+                .map(option => ({ ...option, props: { ...option.props, ...injectedProductProps}}))
+                .filter(option => option.canHandle(product))
+                .forEach(groupByPlacement);
 
             return (
                 <div className="product-controls" style={{transform: `translate(-${rightOffset}px, 0)`}}>
                     <div className="controls-list">
                         {listOptions.length ?
                             <ul className="extensions">
-                                {listOptions.map(tool => (
+                                {listOptions.map(option => (
                                     <ProductControlsOption
-                                        tool={tool}
-                                        active={activeOption === tool.identifier}
-                                        key={tool.identifier}
+                                        option={option}
+                                        active={activeOption === option.identifier}
+                                        key={option.identifier}
                                         onClick={this.onOptionClick}
                                         onOptionMouseEnter={this.onOptionMouseEnter}
                                         onOptionMouseLeave={this.onOptionMouseLeave}
@@ -167,37 +201,58 @@ define([
         },
 
         getDefaultOptions() {
-            const defaultOptions = [];
-            const { onZoom, onFit } = this.props;
+            const { showNavigationControls, onZoom, onFit } = this.props;
 
-            if (onZoom) {
-                defaultOptions.push( {
+            return ([
+                {
                     identifier: 'org-visallo-product-zoom-out',
                     placementHint: 'button',
                     label: '-',
                     props: { handler: _.partial(onZoom, 'out') },
-                    buttonClass: 'zoom'
-                }, {
+                    buttonClass: 'zoom',
+                    canHandle: () => showNavigationControls && !!onZoom
+                },
+                {
                     identifier: 'org-visallo-product-zoom-in',
                     placementHint: 'button',
                     label: '+',
                     props: { handler: _.partial(onZoom, 'in') },
-                    buttonClass: 'zoom'
-                });
-            }
-
-            if (onFit) {
-                defaultOptions.push({
+                    buttonClass: 'zoom',
+                    canHandle: () => showNavigationControls && !!onZoom
+                },
+                {
                     identifier: 'org-visallo-product-fit',
                     placementHint: 'button',
                     label: 'Fit',
-                    props: { handler: onFit}
-                })
-            }
+                    props: { handler: onFit},
+                    canHandle: () => showNavigationControls && !!onFit
+                }
+            ]);
+        },
 
-            return defaultOptions;
+        mapDeprecatedOptions() {
+            const { product, registry } = this.props;
+            const options = [];
+
+            ['org.visallo.map.options', 'org.visallo.graph.options'].forEach(extensionPoint => {
+                const productKind = extensionPoint === 'org.visallo.graph.options' ?
+                    'org.visallo.web.product.graph.GraphWorkProduct' : 'org.visallo.web.product.map.MapWorkProduct';
+
+                registry[extensionPoint].forEach(option => {
+                    options.push({
+                        ...option,
+                        canHandle: (product) => product.kind === productKind
+                    })
+                });
+            });
+
+            return options;
         }
     });
 
-    return ProductControls;
+    return RegistryInjectorHOC(ProductControls, [
+        'org.visallo.graph.options',
+        'org.visallo.map.options',
+        'org.visallo.product.options'
+    ]);
 });

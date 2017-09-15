@@ -102,7 +102,6 @@ define([
                 hasPreview: false,
                 initialProductDisplay: false,
                 panelPadding: { left:0, right:0, top:0, bottom:0 },
-                tools: [],
                 onReady() {},
                 onGhostFinished() {},
                 onUpdatePreview() {}
@@ -303,7 +302,7 @@ define([
 
         render() {
             const { showGraphMenu } = this.state;
-            const { editable } = this.props;
+            const { editable, product } = this.props;
 
             const menu = showGraphMenu ? (
                 <Menu event={showGraphMenu}
@@ -318,10 +317,12 @@ define([
                     {this.state.cy ? (
                         <ProductControls
                             rightOffset={this.props.panelPadding.right}
-                            tools={this.injectToolProps()}
+                            injectedProductProps={this.getInjectedToolProps()}
+                            product={product}
+                            showNavigationControls={true}
                             onFit={this.onControlsFit}
                             onZoom={this.onControlsZoom}
-                            onPan={this.onControlsPan} />
+                        />
                     ) : null}
                     {menu}
                 </div>
@@ -862,18 +863,22 @@ define([
             }
         },
 
-        injectToolProps() {
+        /**
+         * Graph Work Product
+         *
+         * @typedef org.visallo.product.options~Component
+         * @property {object} cy The cytoscape instance
+         * @property {object} product The graph product
+         */
+        getInjectedToolProps() {
             const { cy } = this.state;
+            let props = {};
+
             if (cy) {
-                return this.props.tools.map(tool => ({
-                    ...tool,
-                    props: {
-                        cy,
-                        reapplyGraphStylesheet: this.props.reapplyGraphStylesheet
-                    }
-                }))
+                props = { cy, reapplyGraphStylesheet: this.props.reapplyGraphStylesheet };
             }
-            return [];
+
+            return props;
         },
 
         drawControlDragSelection(newData) {

@@ -26,10 +26,10 @@ define([
 
     const OpenLayers = createReactClass({
         propTypes: {
+            product: PropTypes.object.isRequired,
             source: PropTypes.string.isRequired,
             sourceOptions: PropTypes.object,
             generatePreview: PropTypes.bool,
-            tools: PropTypes.array,
             onSelectElements: PropTypes.func.isRequired,
             onUpdatePreview: PropTypes.func.isRequired,
             onTap: PropTypes.func,
@@ -48,8 +48,7 @@ define([
                 onTap: noop,
                 onContextTap: noop,
                 onZoom: noop,
-                onPan: noop,
-                tools: []
+                onPan: noop
             }
         },
 
@@ -211,8 +210,10 @@ define([
                 <div style={{height: '100%'}}>
                     <div style={{height: '100%'}} ref="map"></div>
                     <ProductControls
-                        tools={this.injectExtraPropsToTools()}
+                        product={this.props.product}
+                        injectedProductProps={this.getInjectedToolProps()}
                         rightOffset={this.props.panelPadding.right}
+                        showNavigationControls={true}
                         onFit={this.onControlsFit}
                         onZoom={this.onControlsZoom}
                         onPan={this.onControlsPan} />
@@ -581,28 +582,27 @@ define([
             el.addEventListener(type, handler, false);
         },
 
-        injectExtraPropsToTools() {
+        /**
+         * Map Work Product
+         *
+         * @typedef org.visallo.product.options~Component
+         * @property {object} product The map product
+         * @property {object} ol The [Openlayers Api](http://openlayers.org/en/latest/apidoc/)
+         * @property {object} map [map](http://openlayers.org/en/latest/apidoc/ol.Map.html) instance
+         * @property {object} cluster
+         * @property {object} cluster.clusterSource [multiPointCluster](https://github.com/visallo/visallo/blob/master/web/plugins/map-product/src/main/resources/org/visallo/web/product/map/multiPointCluster.js) that implements the [`ol.source.Cluster`](http://openlayers.org/en/latest/apidoc/ol.source.Cluster.html) interface to cluster the `source` features.
+         * @property {object} cluster.source The [`ol.source.Vector`](http://openlayers.org/en/latest/apidoc/ol.source.Vector.html) source of all map pins before clustering.
+         * @property {object} cluster.layer The [`ol.layer.Vector`](http://openlayers.org/en/latest/apidoc/ol.layer.Vector.html) pin layer
+         */
+        getInjectedToolProps() {
             const { map, cluster } = this.state;
+            let props = {};
+
             if (map && cluster) {
-                return this.props.tools.map(tool => {
-                    const { product, ...rest } = tool;
-                    /**
-                     * @typedef org.visallo.map.options~Component
-                     * @property {object} product The map product
-                     * @property {object} ol The [Openlayers Api](http://openlayers.org/en/latest/apidoc/)
-                     * @property {object} map [map](http://openlayers.org/en/latest/apidoc/ol.Map.html) instance
-                     * @property {object} cluster
-                     * @property {object} cluster.clusterSource [multiPointCluster](https://github.com/visallo/visallo/blob/master/web/plugins/map-product/src/main/resources/org/visallo/web/product/map/multiPointCluster.js) that implements the [`ol.source.Cluster`](http://openlayers.org/en/latest/apidoc/ol.source.Cluster.html) interface to cluster the `source` features.
-                     * @property {object} cluster.source The [`ol.source.Vector`](http://openlayers.org/en/latest/apidoc/ol.source.Vector.html) source of all map pins before clustering. 
-                     * @property {object} cluster.layer The [`ol.layer.Vector`](http://openlayers.org/en/latest/apidoc/ol.layer.Vector.html) pin layer
-                     */
-                    return {
-                        ...rest,
-                        props: { product, ol, map, cluster }
-                    }
-                });
+                props = { ol, map, cluster };
             }
-            return [];
+
+            return {};
         }
     })
 

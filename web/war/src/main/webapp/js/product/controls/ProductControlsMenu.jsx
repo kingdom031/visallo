@@ -16,7 +16,7 @@ define([
                 onMouseLeave={() => { onOptionMouseLeave(identifier) }}
             >
                 <button
-                    className={active ? 'active' : ''}
+                    className={active ? 'active' : null}
                     onClick={() => { onToggle(identifier) }}
                     title={i18n('controls.options.toggle')}>Option</button>
                 <div style={{display: (active ? 'block' : 'none')}} className="option-container">

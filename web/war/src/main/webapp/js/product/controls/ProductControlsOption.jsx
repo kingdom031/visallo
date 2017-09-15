@@ -83,7 +83,7 @@ define([
 
             return (
                 <div>
-                    <div className={classNames('button', buttonClass)}>
+                    <div className={classNames('button', 'has-popover', buttonClass)}>
                         { icon ?
                             <div className="option-icon" style={{backgroundImage: `url(${icon})`}}></div>
                         : null}

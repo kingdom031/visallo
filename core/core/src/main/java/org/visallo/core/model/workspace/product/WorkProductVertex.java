@@ -8,6 +8,7 @@ public class WorkProductVertex implements ClientApiObject {
     private String title;
     private String type;
     private boolean unauthorized;
+    private boolean ancillary;
 
     public void setId(String id) {
         this.id = id;
@@ -47,5 +48,13 @@ public class WorkProductVertex implements ClientApiObject {
 
     public boolean isUnauthorized() {
         return unauthorized;
+    }
+
+    public boolean isAncillary() {
+        return ancillary;
+    }
+
+    public void setAncillary(boolean ancillary) {
+        this.ancillary = ancillary;
     }
 }

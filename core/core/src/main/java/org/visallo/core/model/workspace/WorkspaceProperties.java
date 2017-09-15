@@ -30,4 +30,6 @@ public class WorkspaceProperties {
     public static final StringVisalloProperty PRODUCT_DATA = new StringVisalloProperty("http://visallo.org/product#data");
     public static final StringVisalloProperty PRODUCT_EXTENDED_DATA = new StringVisalloProperty("http://visallo.org/product#extendedData");
     public static final StreamingVisalloProperty PRODUCT_PREVIEW_DATA_URL = new StreamingVisalloProperty("http://visallo.org/product#previewDataUrl");
+
+    public static final BooleanSingleValueVisalloProperty PRODUCT_TO_ENTITY_IS_ANCILLARY = new BooleanSingleValueVisalloProperty("http://visallo.org/workspace/product/product#ancillary");
 }

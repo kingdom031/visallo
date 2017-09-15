@@ -2,7 +2,9 @@ package org.visallo.core.model.workspace.product;
 
 import com.google.common.collect.Lists;
 import org.vertexium.*;
+import org.visallo.core.exception.VisalloException;
 import org.visallo.core.model.graph.ElementUpdateContext;
+import org.visallo.core.model.graph.GraphUpdateContext;
 import org.visallo.core.model.user.AuthorizationRepository;
 import org.visallo.core.model.workspace.WorkspaceProperties;
 import org.visallo.core.security.VisalloVisibility;
@@ -58,7 +60,7 @@ public abstract class WorkProductServiceHasElementsBase<TVertex extends WorkProd
                 if (!othersById.containsKey(otherId)) {
                     vertex.setUnauthorized(true);
                 }
-                populateVertexWithWorkspaceEdge(propertyVertexEdge, vertex);
+                populateProductVertexWithWorkspaceEdge(propertyVertexEdge, vertex);
                 vertices.put(otherId, vertex);
             }
             extendedData.setVertices(vertices);
@@ -120,13 +122,56 @@ public abstract class WorkProductServiceHasElementsBase<TVertex extends WorkProd
         graph.flush();
     }
 
-    protected abstract void populateVertexWithWorkspaceEdge(Edge propertyVertexEdge, TVertex vertex);
 
-    protected abstract void updateProductEdge(
+    public GraphUpdateContext.UpdateFuture<Edge> addOrUpdateProductEdgeToAncillaryEntity(GraphUpdateContext ctx, Vertex productVertex, String entityId, UpdateProductEdgeOptions options, Visibility visibility) {
+        options.setAncillary(true);
+
+        return addOrUpdateProductEdgeToEntity(ctx, productVertex, entityId, options, visibility);
+    }
+
+    public GraphUpdateContext.UpdateFuture<Edge> addOrUpdateProductEdgeToAncillaryEntity(GraphUpdateContext ctx, String edgeId, Vertex productVertex, String entityId, UpdateProductEdgeOptions options, Visibility visibility) {
+        options.setAncillary(true);
+
+        return addOrUpdateProductEdgeToEntity(ctx, edgeId, productVertex, entityId, options, visibility);
+    }
+
+
+    public GraphUpdateContext.UpdateFuture<Edge> addOrUpdateProductEdgeToEntity(GraphUpdateContext ctx, Vertex productVertex, String entityId, UpdateProductEdgeOptions options, Visibility visibility) {
+        return addOrUpdateProductEdgeToEntity(
+                ctx,
+                getEdgeId(productVertex.getId(), entityId),
+                productVertex,
+                entityId,
+                options,
+                visibility
+        );
+    }
+
+    public GraphUpdateContext.UpdateFuture<Edge> addOrUpdateProductEdgeToEntity(GraphUpdateContext ctx, String edgeId, Vertex productVertex, String entityId, UpdateProductEdgeOptions options, Visibility visibility) {
+        return ctx.getOrCreateEdgeAndUpdate(
+                edgeId,
+                productVertex.getId(),
+                entityId,
+                WorkspaceProperties.PRODUCT_TO_ENTITY_RELATIONSHIP_IRI,
+                visibility,
+                elemCtx -> updateProductEdge(elemCtx, options, visibility)
+        );
+    }
+
+    @Override
+    public TVertex populateProductVertexWithWorkspaceEdge(Edge propertyVertexEdge) {
+        TVertex vertex = createWorkProductVertex();
+        populateProductVertexWithWorkspaceEdge(propertyVertexEdge, vertex);
+        return vertex;
+    }
+
+    protected void updateProductEdge(
             ElementUpdateContext<Edge> elemCtx,
             UpdateProductEdgeOptions update,
             Visibility visibility
-    );
+    ) {
+        WorkspaceProperties.PRODUCT_TO_ENTITY_IS_ANCILLARY.updateProperty(elemCtx, update.isAncillary(), visibility);
+    }
 
     public static String getEdgeId(String productId, String vertexId) {
         return productId + "_hasVertex_" + vertexId;

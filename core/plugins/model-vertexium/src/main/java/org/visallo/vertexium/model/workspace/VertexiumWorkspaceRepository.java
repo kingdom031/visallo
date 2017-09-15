@@ -126,6 +126,7 @@ public class VertexiumWorkspaceRepository extends WorkspaceRepository {
         this.lockRepository = lockRepository;
 
         graphAuthorizationRepository.addAuthorizationToGraph(VISIBILITY_STRING);
+        graphAuthorizationRepository.addAuthorizationToGraph(VISIBILITY_PRODUCT_STRING);
         graphAuthorizationRepository.addAuthorizationToGraph(VisalloVisibility.SUPER_USER_VISIBILITY_STRING);
     }
 
@@ -1207,6 +1208,51 @@ public class VertexiumWorkspaceRepository extends WorkspaceRepository {
         }
 
         return productVertexToProduct(workspaceId, productVertex, includeExtended, extendedData, authorizations, user);
+    }
+
+    public WorkProductVertex addOrUpdateProductAncillaryVertex(String workspaceId, String productId, String vertexId, User user, GraphUpdateContext.Update<Vertex> updateFn) {
+        Authorizations authorizations = getAuthorizationRepository().getGraphAuthorizations(
+                user,
+                VISIBILITY_STRING,
+                VISIBILITY_PRODUCT_STRING,
+                workspaceId
+        );
+        Vertex productVertex = getGraph().getVertex(productId, authorizations);
+        if (productVertex == null) {
+            return null;
+        }
+
+        String kind = WorkspaceProperties.PRODUCT_KIND.getPropertyValue(productVertex);
+        WorkProductService service = getWorkProductServiceByKind(kind);
+        if (!(service instanceof WorkProductServiceHasElements)) throw new VisalloException("Service doesn't support entities");
+        WorkProductServiceHasElements elementsService = (WorkProductServiceHasElements) service;
+
+        Vertex vertex = null;
+        Edge edge = null;
+        Visibility workspaceVisibility = VISIBILITY.getVisibility();
+        Visibility productVisibility = VISIBILITY_PRODUCT.getVisibility();
+
+        try (GraphUpdateContext ctx = graphRepository.beginGraphUpdate(Priority.NORMAL, user, authorizations)) {
+            ctx.setPushOnQueue(false);
+            vertex = ctx.getOrCreateVertexAndUpdate(vertexId, productVisibility, updateFn).get();
+
+            UpdateProductEdgeOptions options = new UpdateProductEdgeOptions();
+            options.setAncillary(true);
+            // FIXME ? why cast needed
+            edge = (Edge) elementsService.addOrUpdateProductEdgeToAncillaryEntity(
+                    ctx,
+                    productVertex,
+                    vertex.getId(),
+                    options,
+                    workspaceVisibility
+            ).get();
+
+            // TODO: broadcast as ancillaryChange? or change workQueue to somehow specify that it can't be requested normally
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return elementsService.populateProductVertexWithWorkspaceEdge(edge);
     }
 
     private ProductPreview getProductPreviewFromUrl(String url) {

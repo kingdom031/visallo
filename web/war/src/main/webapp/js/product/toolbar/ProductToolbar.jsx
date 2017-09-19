@@ -3,37 +3,37 @@ define([
     'prop-types',
     'configuration/plugins/registry',
     'components/RegistryInjectorHOC',
-    './ProductControlsOption',
-    './ProductControlsMenu'
+    './ProductToolbarItem',
+    './ProductToolbarMenu'
 ], function(
     createReactClass,
     PropTypes,
     registry,
     RegistryInjectorHOC,
-    ProductControlsOption,
-    ProductControlsMenu) {
+    ProductToolbarItem,
+    ProductToolbarMenu) {
     'use strict';
 
     /**
-     * Plugin to add custom options components (Flight or React) which display in toolbar at the top right of a product.
+     * Plugin to add custom item components (Flight or React) which display in toolbar at the top right of a product.
      *
-     * @param {string} identifier Unique id for this option item
-     * @param {string} optionComponentPath Path to {@link org.visallo.product.options~Component} to render
-     * @param {func} canHandle Given `product` should this option be placed
-     * @param {string} [placementHint=menu] How this option should be displayed in the toolbar
+     * @param {string} identifier Unique id for this item
+     * @param {string} itemComponentPath Path to {@link org.visallo.product.toolbar.item~Component} to render
+     * @param {func} canHandle Given `product` should this item be placed
+     * @param {string} [placementHint=menu] How this item should be displayed in the toolbar
      * * `menu` inside the hamburger menu list
      * * `popover` as a button that will expand a popover where the component is rendered.
-     *   If specified one of `icon` or `label` is required. Also passed {@link org.visallo.product.options.popover~onResize}
+     *   If specified one of `icon` or `label` is required. Also passed {@link org.visallo.product.toolbar.popover~onResize}
      * * `button` as an inline button component
      * @param {string} [buttonClass] Css class to add to the button element when placed as `button` or `popover`
      * @param {string} [icon] Path to the icon to render when displayed as a `popover`
      * @param {string} [label] Label text to render when displayed as a `popover`
      */
-    registry.documentExtensionPoint('org.visallo.product.options',
-        'Add components to the product options toolbar',
+    registry.documentExtensionPoint('org.visallo.product.toolbar.item',
+        'Add components to the product toolbar',
         function(e) {
             return ('identifier' in e) && ('canHandle' in e && _.isFunction(e.canHandle))
-                && (['optionComponentPath', 'icon', 'label'].some(key => key in e));
+                && (['itemComponentPath', 'icon', 'label'].some(key => key in e));
         },
         'http://docs.visallo.org/extension-points/front-end/productOptions'
     );
@@ -46,7 +46,7 @@ define([
     const MENU_IDENTIFIER = 'menu';
     const HOVER_OPEN_DELAY = 600;
 
-    const ProductControls = createReactClass({
+    const ProductToolbar = createReactClass({
 
         propTypes: {
             product: PropTypes.shape({
@@ -70,86 +70,86 @@ define([
 
         getInitialState() {
             return {
-                activeOption: null,
+                activeItem: null,
                 stayOpen: false
             }
         },
 
         componentDidMount() {
-            $(document).on('keydown.org-visallo-graph-product-controls', (event) => {
+            $(document).on('keydown.org-visallo-graph-product-toolbar', (event) => {
                 if (event.which === 27) { //esc
-                    this.setState({ activeOption: null, stayOpen: false });
+                    this.setState({ activeItem: null, stayOpen: false });
                 }
             });
         },
 
         componentDidUpdate(prevState, prevProps) {
-            if (this.state.stayOpen && this.openOptionTimeout) {
-                clearTimeout(this.openOptionTimeout);
-                this.openOptionTimeout = null;
+            if (this.state.stayOpen && this.openItemTimeout) {
+                clearTimeout(this.openItemTimeout);
+                this.openItemTimeout = null;
             }
         },
 
         componentWillUnmount() {
-            $(document).off('keydown.org-visallo-graph-product-controls');
+            $(document).off('keydown.org-visallo-graph-product-toolbar');
         },
 
         render() {
-            const { activeOption } = this.state;
+            const { activeItem } = this.state;
             const { onFit, onZoom, rightOffset, registry, injectedProductProps, product } = this.props;
-            const menuOptions = [], listOptions = [];
-            const groupByPlacement = (option) => {
-               const { placementHint, icon, label } = option;
+            const menuItems = [], listItems = [];
+            const groupByPlacement = (item) => {
+               const { placementHint, icon, label } = item;
 
                if (placementHint) {
                    if (placementHint === placementHint.MENU) {
-                       menuOptions.push(option);
+                       menuItems.push(item);
                    } else {
-                       listOptions.push(option);
+                       listItems.push(item);
                    }
                } else if (icon || label) {
-                   listOptions.push(option);
+                   listItems.push(item);
                } else {
-                   menuOptions.push(option);
+                   menuItems.push(item);
                }
             };
-            const options = [
-                ...registry['org.visallo.product.options'],
-                ...this.getDefaultOptions(),
-                ...this.mapDeprecatedOptions()
+            const items = [
+                ...registry['org.visallo.product.toolbar.item'],
+                ...this.getDefaultItems(),
+                ...this.mapDeprecatedItems()
             ];
 
-            options
-                .map(option => ({ ...option, props: { ...option.props, ...injectedProductProps}}))
-                .filter(option => option.canHandle(product))
+            items
+                .map(item => ({ ...item, props: { ...item.props, ...injectedProductProps}}))
+                .filter(item => item.canHandle(product))
                 .forEach(groupByPlacement);
 
             return (
-                <div className="product-controls" style={{transform: `translate(-${rightOffset}px, 0)`}}>
-                    <div className="controls-list">
-                        {listOptions.length ?
+                <div className="product-toolbar" style={{transform: `translate(-${rightOffset}px, 0)`}}>
+                    <div className="toolbar-list">
+                        {listItems.length ?
                             <ul className="extensions">
-                                {listOptions.map(option => (
-                                    <ProductControlsOption
-                                        option={option}
-                                        active={activeOption === option.identifier}
-                                        key={option.identifier}
-                                        onClick={this.onOptionClick}
-                                        onOptionMouseEnter={this.onOptionMouseEnter}
-                                        onOptionMouseLeave={this.onOptionMouseLeave}
+                                {listItems.map(item => (
+                                    <ProductToolbarItem
+                                        item={item}
+                                        active={activeItem === item.identifier}
+                                        key={item.identifier}
+                                        onClick={this.onItemClick}
+                                        onItemMouseEnter={this.onItemMouseEnter}
+                                        onItemMouseLeave={this.onItemMouseLeave}
                                         rightOffset={rightOffset}
                                     />
                                 ))}
                             </ul>
                         : null}
-                        {menuOptions.length ?
-                            <ProductControlsMenu
-                                options={menuOptions}
-                                active={activeOption === MENU_IDENTIFIER}
+                        {menuItems.length ?
+                            <ProductToolbarMenu
+                                items={menuItems}
+                                active={activeItem === MENU_IDENTIFIER}
                                 identifier={MENU_IDENTIFIER}
-                                onToggle={this.onOptionClick}
-                                onOptionMouseEnter={this.onOptionMouseEnter}
-                                onOptionMouseLeave={this.onOptionMouseLeave}
+                                onToggle={this.onItemClick}
+                                onItemMouseEnter={this.onItemMouseEnter}
+                                onItemMouseLeave={this.onItemMouseLeave}
                             />
                         : null}
                     </div>
@@ -157,50 +157,50 @@ define([
             );
         },
 
-        onOptionClick(identifier) {
-            const { activeOption, stayOpen } = this.state;
+        onItemClick(identifier) {
+            const { activeItem, stayOpen } = this.state;
 
-            if (activeOption) {
-                if (activeOption === identifier && !stayOpen) {
+            if (activeItem) {
+                if (activeItem === identifier && !stayOpen) {
                     this.setState({ stayOpen: true });
-                } else if (activeOption === identifier) {
-                    this.setActiveOption();
+                } else if (activeItem === identifier) {
+                    this.setActiveItem();
                 } else {
-                    this.setActiveOption(activeOption, true);
+                    this.setActiveItem(activeItem, true);
                 }
             } else if (identifier) {
-                this.setActiveOption(identifier, true);
+                this.setActiveItem(identifier, true);
             } else {
-                this.setActiveOption();
+                this.setActiveItem();
             }
         },
 
-        onOptionMouseEnter(identifier) {
+        onItemMouseEnter(identifier) {
             if (!this.state.stayOpen) {
-                this.openOptionTimeout = setTimeout(() => { this.setActiveOption(identifier) }, HOVER_OPEN_DELAY);
+                this.openItemTimeout = setTimeout(() => { this.setActiveItem(identifier) }, HOVER_OPEN_DELAY);
             }
         },
 
-        onOptionMouseLeave(identifier) {
+        onItemMouseLeave(identifier) {
             if (!this.state.stayOpen) {
-                const { activeOption, stayOpen } = this.state;
+                const { activeItem, stayOpen } = this.state;
 
-                if (this.openOptionTimeout) {
-                    clearTimeout(this.openOptionTimeout);
-                    this.openOptionTimeout = null;
+                if (this.openItemTimeout) {
+                    clearTimeout(this.openItemTimeout);
+                    this.openItemTimeout = null;
                 }
 
-                if (activeOption && !stayOpen) {
-                    this.setActiveOption();
+                if (activeItem && !stayOpen) {
+                    this.setActiveItem();
                 }
             }
         },
 
-        setActiveOption(activeOption = null, stayOpen = false) {
-            this.setState({ activeOption, stayOpen });
+        setActiveItem(activeItem = null, stayOpen = false) {
+            this.setState({ activeItem, stayOpen });
         },
 
-        getDefaultOptions() {
+        getDefaultItems() {
             const { showNavigationControls, onZoom, onFit } = this.props;
 
             return ([
@@ -230,29 +230,36 @@ define([
             ]);
         },
 
-        mapDeprecatedOptions() {
+        mapDeprecatedItems() {
             const { product, registry } = this.props;
-            const options = [];
+            const items = [];
 
             ['org.visallo.map.options', 'org.visallo.graph.options'].forEach(extensionPoint => {
                 const productKind = extensionPoint === 'org.visallo.graph.options' ?
                     'org.visallo.web.product.graph.GraphWorkProduct' : 'org.visallo.web.product.map.MapWorkProduct';
 
-                registry[extensionPoint].forEach(option => {
-                    options.push({
-                        ...option,
+                registry[extensionPoint].forEach(item => {
+                    const { optionComponentPath, ...config } = item;
+                    const mappedItem = {
+                        ...config,
                         canHandle: (product) => product.kind === productKind
-                    })
+                    };
+
+                    if (optionComponentPath) {
+                        mappedItem.itemComponentPath = optionComponentPath;
+                    }
+
+                    items.push(mappedItem);
                 });
             });
 
-            return options;
+            return items;
         }
     });
 
-    return RegistryInjectorHOC(ProductControls, [
+    return RegistryInjectorHOC(ProductToolbar, [
         'org.visallo.graph.options',
         'org.visallo.map.options',
-        'org.visallo.product.options'
+        'org.visallo.product.toolbar.item'
     ]);
 });

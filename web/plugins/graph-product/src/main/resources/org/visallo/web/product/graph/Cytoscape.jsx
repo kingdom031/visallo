@@ -6,7 +6,7 @@ define([
     'cytoscape-dagre',
     'dagre',
     'fast-json-patch',
-    'product/controls/ProductControls',
+    'product/toolbar/ProductToolbar',
     'colorjs',
     './betterGrid',
     './Menu',
@@ -19,7 +19,7 @@ define([
     cytoscapeDagre,
     dagre,
     jsonpatch,
-    ProductControls,
+    ProductToolbar,
     colorjs,
     betterGrid,
     Menu,
@@ -315,7 +315,7 @@ define([
                 <div onMouseDown={this.onMouseDown} style={{height: '100%'}}>
                     <div style={{height: '100%'}} ref="cytoscape"></div>
                     {this.state.cy ? (
-                        <ProductControls
+                        <ProductToolbar
                             rightOffset={this.props.panelPadding.right}
                             injectedProductProps={this.getInjectedToolProps()}
                             product={product}
@@ -866,7 +866,7 @@ define([
         /**
          * Graph Work Product
          *
-         * @typedef org.visallo.product.options~Component
+         * @typedef org.visallo.product.toolbar.item~Component
          * @property {object} cy The cytoscape instance
          * @property {object} product The graph product
          */

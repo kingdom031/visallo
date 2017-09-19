@@ -12,93 +12,93 @@ define([
 
     const PADDING = 10;
 
-    const ProductControlsOption = createReactClass({
+    const ProductToolbarItem = createReactClass({
 
         propTypes: {
-            option: PropTypes.shape({
+            item: PropTypes.shape({
                 identifier: PropTypes.string.isRequired,
-                optionComponentPath: PropTypes.string,
+                itemComponentPath: PropTypes.string,
                 icon: PropTypes.string,
                 label: PropTypes.string,
                 props: PropTypes.object
             }),
             active: PropTypes.bool,
             onClick: PropTypes.func,
-            onOptionMouseEnter: PropTypes.func,
-            onOptionMouseLeave: PropTypes.func,
+            onItemMouseEnter: PropTypes.func,
+            onItemMouseLeave: PropTypes.func,
             rightOffset: PropTypes.number
         },
 
         render() {
-            const { active, option, onOptionMouseEnter, onOptionMouseLeave } = this.props;
-            const { props: optionProps, icon, label, buttonClass, identifier, optionComponentPath, placementHint } = option;
+            const { active, item, onItemMouseEnter, onItemMouseLeave } = this.props;
+            const { props: itemProps, icon, label, buttonClass, identifier, itemComponentPath, placementHint } = item;
 
             return (
                 <li
-                    className={classNames('controls-option', { active })}
-                    onClick={this.onOptionClick}
-                    ref={(ref) => { this.option = ref }}
-                    onMouseEnter={(event) => { onOptionMouseEnter(identifier) }}
-                    onMouseLeave={(event) => { onOptionMouseLeave(identifier) }}
+                    className={classNames('toolbar-item', { active })}
+                    onClick={this.onItemClick}
+                    ref={(ref) => { this.item = ref }}
+                    onMouseEnter={(event) => { onItemMouseEnter(identifier) }}
+                    onMouseLeave={(event) => { onItemMouseLeave(identifier) }}
                 >
-                  {optionComponentPath
+                  {itemComponentPath
                       ? placementHint && placementHint === 'popover'
-                          ? this.renderPopoverOption()
-                          : this.renderOption()
+                          ? this.renderPopoverItem()
+                          : this.renderItem()
                       : this.renderButton()}
                 </li>
             );
         },
 
         renderButton() {
-            const { active, option } = this.props;
-            const { props: optionProps, icon, label, buttonClass, identifier, optionComponentPath } = option;
+            const { active, item } = this.props;
+            const { props: itemProps, icon, label, buttonClass, identifier, itemComponentPath } = item;
 
             return (
                 <div className={classNames('button', buttonClass)}>
                     { icon ?
-                        <div className="option-icon" style={{backgroundImage: `url(${icon})`}}></div>
+                        <div className="item-icon" style={{backgroundImage: `url(${icon})`}}></div>
                     : null}
                     <span>{label}</span>
                 </div>
             )
         },
 
-        renderOption() {
-            const { props: optionProps, identifier, optionComponentPath } = this.props.option;
+        renderItem() {
+            const { props: itemProps, identifier, itemComponentPath } = this.props.item;
 
             return (
                 <Attacher
                     key={identifier}
-                    componentPath={optionComponentPath}
-                    {...optionProps}
+                    componentPath={itemComponentPath}
+                    {...itemProps}
                 />
             )
         },
 
-        renderPopoverOption() {
-            const { active, option } = this.props;
-            const { props: optionProps = {}, icon, label, buttonClass, identifier, optionComponentPath } = option;
+        renderPopoverItem() {
+            const { active, item } = this.props;
+            const { props: itemProps = {}, icon, label, buttonClass, identifier, itemComponentPath } = item;
 
 
             return (
                 <div>
                     <div className={classNames('button', 'has-popover', buttonClass)}>
                         { icon ?
-                            <div className="option-icon" style={{backgroundImage: `url(${icon})`}}></div>
+                            <div className="item-icon" style={{backgroundImage: `url(${icon})`}}></div>
                         : null}
                         <span>{label}</span>
                     </div>
                     <div
                         style={{display: (active ? 'block' : 'none')}}
-                        className="option-container"
+                        className="item-container"
                         ref={(ref) => { this.popover = ref }}
                     >
                        {active ? <Attacher
                             key={identifier}
-                            componentPath={optionComponentPath}
+                            componentPath={itemComponentPath}
                             afterAttach={this.positionPopover}
-                            {...optionProps}
+                            {...itemProps}
                             onResize={this.positionPopover}
                        /> : null}
                     </div>
@@ -107,11 +107,11 @@ define([
             )
         },
 
-        onOptionClick(event) {
-            if (!$(event.target).closest('.option-container').length) {
-                const { props: optionProps = {}, identifier } = this.props.option;
-                if (_.isFunction(optionProps.handler)) {
-                    optionProps.handler();
+        onItemClick(event) {
+            if (!$(event.target).closest('.item-container').length) {
+                const { props: itemProps = {}, identifier } = this.props.item;
+                if (_.isFunction(itemProps.handler)) {
+                    itemProps.handler();
                 } else {
                     this.props.onClick(identifier);
                 }
@@ -119,22 +119,22 @@ define([
         },
 
         /**
-         * Call `props.onResize` after your component changes size to update the popover's position
-         * @callback org.visallo.product.options~onResize
+         * Call `props.onResize` after your component with placementHint `popover` changes size to update the popover's position
+         * @callback org.visallo.product.toolbar.item~onResize
          */
         positionPopover() {
             const rightOffset = this.props.rightOffset;
-            const { left: optionLeft, width: optionWidth, right: optionRight } = this.option.getBoundingClientRect();
+            const { left: itemLeft, width: itemWidth, right: itemRight } = this.item.getBoundingClientRect();
             const { left, right, width } = this.popover.getBoundingClientRect();
             const windowWidth = $(window).width();
             const maxLeft = windowWidth - width - PADDING - rightOffset;
             const currentOffset = $(this.popover).offset();
-            const positionLeft = Math.min(optionLeft, maxLeft);
+            const positionLeft = Math.min(itemLeft, maxLeft);
 
-            $(this.arrow).offset({ top: $(this.arrow).offset.top, left: (optionLeft + (optionWidth / 2))});
+            $(this.arrow).offset({ top: $(this.arrow).offset.top, left: (itemLeft + (itemWidth / 2))});
             $(this.popover).offset({ top: currentOffset.top, left: Math.max(positionLeft, 40) }); //menubar width
         }
     });
 
-    return ProductControlsOption;
+    return ProductToolbarItem;
 });

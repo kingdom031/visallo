@@ -4,14 +4,14 @@ define([
     'openlayers',
     'fast-json-patch',
     './multiPointCluster',
-    'product/controls/ProductControls'
+    'product/toolbar/ProductToolbar'
 ], function(
     createReactClass,
     PropTypes,
     ol,
     jsonpatch,
     MultiPointCluster,
-    ProductControls) {
+    ProductToolbar) {
 
     const noop = function() {};
 
@@ -209,14 +209,13 @@ define([
             return (
                 <div style={{height: '100%'}}>
                     <div style={{height: '100%'}} ref="map"></div>
-                    <ProductControls
+                    <ProductToolbar
                         product={this.props.product}
                         injectedProductProps={this.getInjectedToolProps()}
                         rightOffset={this.props.panelPadding.right}
                         showNavigationControls={true}
                         onFit={this.onControlsFit}
-                        onZoom={this.onControlsZoom}
-                        onPan={this.onControlsPan} />
+                        onZoom={this.onControlsZoom} />
                     {moveWrapper}
                 </div>
             )
@@ -585,7 +584,7 @@ define([
         /**
          * Map Work Product
          *
-         * @typedef org.visallo.product.options~Component
+         * @typedef org.visallo.product.toolbar.item~Component
          * @property {object} product The map product
          * @property {object} ol The [Openlayers Api](http://openlayers.org/en/latest/apidoc/)
          * @property {object} map [map](http://openlayers.org/en/latest/apidoc/ol.Map.html) instance
@@ -599,7 +598,7 @@ define([
             let props = {};
 
             if (map && cluster) {
-                props = { ol, map, cluster };
+                props = { product: this.props.product, ol, map, cluster };
             }
 
             return {};

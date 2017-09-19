@@ -31,10 +31,10 @@ define([
     'use strict';
 
     /**
-     * @deprecated Use {@link org.visallo.product.options} instead
+     * @deprecated Use {@link org.visallo.product.toolbar.item} instead
      */
     registry.documentExtensionPoint('org.visallo.graph.options',
-        'Add components to the graph options toolbar',
+        'Add components to the graph product toolbar',
         function(e) {
             return ('identifier' in e) && ('optionComponentPath' in e);
         },
@@ -297,14 +297,14 @@ define([
         },
         'http://docs.visallo.org/extension-points/front-end/graphEdge/transformer.html'
     );
-    registry.registerExtension('org.visallo.product.options', {
+    registry.registerExtension('org.visallo.product.toolbar.item', {
         identifier: 'toggleEdgeLabel',
-        optionComponentPath: 'org/visallo/web/product/graph/dist/EdgeLabel',
+        itemComponentPath: 'org/visallo/web/product/graph/dist/EdgeLabel',
         canHandle: (product) => product.kind === 'org.visallo.web.product.graph.GraphWorkProduct'
     });
-    registry.registerExtension('org.visallo.product.options', {
+    registry.registerExtension('org.visallo.product.toolbar.item', {
         identifier: 'toggleSnapToGrid',
-        optionComponentPath: 'org/visallo/web/product/graph/dist/SnapToGrid',
+        itemComponentPath: 'org/visallo/web/product/graph/dist/SnapToGrid',
         canHandle: (product) => product.kind === 'org.visallo.web.product.graph.GraphWorkProduct'
     });
     registry.registerExtension('org.visallo.vertex.menu', {

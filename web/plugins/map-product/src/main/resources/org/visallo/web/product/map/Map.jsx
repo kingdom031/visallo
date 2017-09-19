@@ -9,7 +9,7 @@ define([
     'use strict';
 
     /**
-     * @deprecated Use {@link org.visallo.product.options} instead
+     * @deprecated Use {@link org.visallo.product.toolbar.item} instead
      */
     registry.documentExtensionPoint('org.visallo.map.options',
         'Add components to the map options toolbar',

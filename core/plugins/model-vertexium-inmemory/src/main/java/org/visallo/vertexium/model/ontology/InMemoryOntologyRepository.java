@@ -15,6 +15,7 @@ import org.vertexium.TextIndexHint;
 import org.vertexium.inmemory.InMemoryAuthorizations;
 import org.vertexium.util.ConvertingIterable;
 import org.vertexium.util.IterableUtils;
+import org.visallo.core.cache.CacheService;
 import org.visallo.core.config.Configuration;
 import org.visallo.core.exception.VisalloException;
 import org.visallo.core.model.lock.LockRepository;
@@ -48,11 +49,12 @@ public class InMemoryOntologyRepository extends OntologyRepositoryBase {
 
     @Inject
     public InMemoryOntologyRepository(
-            final Graph graph,
-            final Configuration configuration,
-            final LockRepository lockRepository
+            Graph graph,
+            Configuration configuration,
+            LockRepository lockRepository,
+            CacheService cacheService
     ) throws Exception {
-        super(configuration, lockRepository);
+        super(configuration, lockRepository, cacheService);
         this.graph = graph;
 
         clearCache();
@@ -473,16 +475,6 @@ public class InMemoryOntologyRepository extends OntologyRepositoryBase {
     }
 
     @Override
-    public void clearCache() {
-        // do nothing it's all in memory already.
-    }
-
-    @Override
-    public void clearCache(String workspaceId) {
-        // do nothing it's all in memory already.
-    }
-
-    @Override
     public Iterable<Relationship> getRelationships(String workspaceId) {
         return new ArrayList<>(computeRelationshipCacheForWorkspace(workspaceId).values());
     }
@@ -681,6 +673,19 @@ public class InMemoryOntologyRepository extends OntologyRepositoryBase {
             if (deleteChangeableProperties) {
                 deleteChangeableProperties(relationship, null);
             }
+
+            for (Concept domainConcept : domainConcepts) {
+                if (!relationship.getDomainConceptIRIs().contains(domainConcept.getIRI())) {
+                    relationship.getDomainConceptIRIs().add(domainConcept.getIRI());
+                }
+            }
+
+            for (Concept rangeConcept : rangeConcepts) {
+                if (!relationship.getRangeConceptIRIs().contains(rangeConcept.getIRI())) {
+                    relationship.getRangeConceptIRIs().add(rangeConcept.getIRI());
+                }
+            }
+
             return relationship;
         }
 

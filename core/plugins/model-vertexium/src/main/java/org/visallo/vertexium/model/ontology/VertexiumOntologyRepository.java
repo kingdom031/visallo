@@ -24,6 +24,7 @@ import org.vertexium.util.CloseableUtils;
 import org.vertexium.util.ConvertingIterable;
 import org.vertexium.util.IterableUtils;
 import org.vertexium.util.StreamUtils;
+import org.visallo.core.cache.CacheService;
 import org.visallo.core.config.Configuration;
 import org.visallo.core.exception.VisalloException;
 import org.visallo.core.model.graph.GraphRepository;
@@ -73,9 +74,10 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
             VisibilityTranslator visibilityTranslator,
             Configuration config,
             GraphAuthorizationRepository graphAuthorizationRepository,
-            LockRepository lockRepository
+            LockRepository lockRepository,
+            CacheService cacheService
     ) throws Exception {
-        super(config, lockRepository);
+        super(config, lockRepository, cacheService);
         try {
             this.graph = graph;
             this.graphRepository = graphRepository;
@@ -147,6 +149,7 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
     @Override
     public void clearCache() {
         LOGGER.info("clearing ontology cache");
+        super.clearCache();
         graph.flush();
     }
 
@@ -154,6 +157,7 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
     public void clearCache(String workspaceId) {
         checkNotNull(workspaceId, "Workspace should not be null");
         LOGGER.info("clearing ontology cache for workspace %s", workspaceId);
+        super.clearCache(workspaceId);
         graph.flush();
     }
 
@@ -176,9 +180,15 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
         String md5 = DigestUtils.md5Hex(data);
         StreamingPropertyValue value = new StreamingPropertyValue(new ByteArrayInputStream(data), byte[].class);
         value.searchIndex(false);
-        Metadata metadata = new Metadata();
         Vertex rootConceptVertex = ((VertexiumConcept) getRootConcept(PUBLIC)).getVertex();
-        metadata.add("index", Iterables.size(OntologyProperties.ONTOLOGY_FILE.getProperties(rootConceptVertex)), VISIBILITY.getVisibility());
+        Property existingProperty = OntologyProperties.ONTOLOGY_FILE.getProperty(rootConceptVertex, documentIRI.toString());
+        Metadata metadata;
+        if (existingProperty == null) {
+            metadata = new Metadata();
+            metadata.add("index", Iterables.size(OntologyProperties.ONTOLOGY_FILE.getProperties(rootConceptVertex)), VISIBILITY.getVisibility());
+        } else {
+            metadata = existingProperty.getMetadata();
+        }
         OntologyProperties.ONTOLOGY_FILE.addPropertyValue(rootConceptVertex, documentIRI.toString(), value, metadata, VISIBILITY.getVisibility(), authorizations);
         OntologyProperties.ONTOLOGY_FILE_MD5.addPropertyValue(rootConceptVertex, documentIRI.toString(), md5, metadata, VISIBILITY.getVisibility(), authorizations);
         graph.flush();
@@ -206,7 +216,8 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
         for (Property ontologyFile : ontologyFiles) {
             IRI ontologyFileIRI = IRI.create(ontologyFile.getKey());
             if (excludedIRI != null && excludedIRI.equals(ontologyFileIRI)) {
-                continue;
+                // If we're skipping an ontology, we shouldn't be loading the rest since they may include it
+                return loadedOntologies;
             }
             try (InputStream visalloBaseOntologyIn = ((StreamingPropertyValue) ontologyFile.getValue()).getInputStream()) {
                 Reader visalloBaseOntologyReader = new InputStreamReader(visalloBaseOntologyIn);
@@ -737,15 +748,28 @@ public class VertexiumOntologyRepository extends OntologyRepositoryBase {
             String workspaceId
     ) {
         Relationship relationship = getRelationshipByIRI(relationshipIRI, workspaceId);
-        if (relationship != null) {
-            if (isDeclaredInOntology) {
-                deleteChangeableProperties(relationship, getAuthorizations(workspaceId));
-            }
-            return relationship;
-        }
-
         try (GraphUpdateContext ctx = graphRepository.beginGraphUpdate(getPriority(user), user, getAuthorizations(workspaceId))) {
             ctx.setPushOnQueue(false);
+            if (relationship != null) {
+                if (isDeclaredInOntology) {
+                    deleteChangeableProperties(relationship, getAuthorizations(workspaceId));
+                }
+
+                Vertex relationshipVertex = ((VertexiumRelationship) relationship).getVertex();
+                for (Concept domainConcept : domainConcepts) {
+                    if (!relationship.getDomainConceptIRIs().contains(domainConcept.getIRI())) {
+                        findOrAddEdge(ctx, ((VertexiumConcept) domainConcept).getVertex(), relationshipVertex, LabelName.HAS_EDGE.toString());
+                    }
+                }
+                for (Concept rangeConcept : rangeConcepts) {
+                    if (!relationship.getRangeConceptIRIs().contains(rangeConcept.getIRI())) {
+                        findOrAddEdge(ctx, relationshipVertex, ((VertexiumConcept) rangeConcept).getVertex(), LabelName.HAS_EDGE.toString());
+                    }
+                }
+
+                return relationship;
+            }
+
 
             Visibility visibility = VISIBILITY.getVisibility();
             VisibilityJson visibilityJson = new VisibilityJson(visibility.getVisibilityString());

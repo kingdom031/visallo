@@ -35,6 +35,7 @@ public class PredefinedToDynamicOntology extends MigrationBase {
 
     @Override
     protected boolean migrate(Graph graph) {
+        LOGGER.info("Updating Vertexium property definitions.");
         graph.defineProperty(OntologyProperties.DISPLAY_NAME.getPropertyName())
                 .dataType(String.class)
                 .textIndexHint(TextIndexHint.EXACT_MATCH)
@@ -62,10 +63,15 @@ public class PredefinedToDynamicOntology extends MigrationBase {
     @Override
     protected void afterMigrate(Graph graph) {
         if (graph instanceof GraphWithSearchIndex) {
+            LOGGER.info("Re-indexing ontology elements...");
+
             VisalloBootstrap bootstrap = VisalloBootstrap.bootstrap(getConfiguration());
             SearchIndex searchIndex = ((GraphWithSearchIndex) graph).getSearchIndex();
             Authorizations authorizations = graph.createAuthorizations(VisalloVisibility.SUPER_USER_VISIBILITY_STRING, OntologyRepository.VISIBILITY_STRING);
-            graph.getVerticesWithPrefix(VertexiumOntologyRepository.ID_PREFIX, authorizations).forEach(vertex -> searchIndex.addElement(graph, vertex, authorizations));
+            graph.getVerticesWithPrefix(VertexiumOntologyRepository.ID_PREFIX, authorizations).forEach(vertex -> {
+                LOGGER.debug("Adding vertex %s to search index.", vertex.getId());
+                searchIndex.addElement(graph, vertex, authorizations);
+            });
             searchIndex.flush(graph);
         }
     }

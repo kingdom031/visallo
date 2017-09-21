@@ -31,6 +31,8 @@ public abstract class MigrationBase extends CommandLineTool {
                     throw new VisalloException("Migration can only run from version " + getNeededGraphVersion() +
                             ". Current graph version = " + visalloGraphVersion);
                 }
+            } else {
+                throw new VisalloException("Unexpected value for graph version: " + visalloGraphVersionObj);
             }
 
             if (migrate(graph)) {

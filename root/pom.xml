@@ -63,7 +63,7 @@
         <commons.lang3.version>3.4</commons.lang3.version>
         <commons.httpclient.version>3.1</commons.httpclient.version>
         <curator.version>2.11.0</curator.version>
-        <elasticsearch.version>5.3.3</elasticsearch.version>
+        <elasticsearch.version>5.5.3</elasticsearch.version>
         <evo.inflector.version>1.0.1</evo.inflector.version>
         <guice.version>4.1.0</guice.version>
         <visallo.closure.compiler.version>1.0.0</visallo.closure.compiler.version>
